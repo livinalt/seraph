@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FileCode, Globe, Users, Layers, Coins } from "lucide-react"; // icons added
 
 const SearchBar = () => {
@@ -39,7 +39,7 @@ const SearchBar = () => {
                 <input
                     type="text"
                     placeholder={`Search by ${active}...`}
-                    className="flex-grow p-4 bg-transparent text-gray-200 outline-none"
+                    className="grow p-4 bg-transparent text-gray-200 outline-none"
                 />
 
                 <button className="bg-yellow-400 text-black px-6 font-semibold hover:bg-yellow-300 transition">

@@ -1,14 +1,13 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 const AdBanner = () => {
     useEffect(() => {
         try {
-            // @ts-ignore
+            // @ts-expect-error AdSense injects adsbygoogle globally – TypeScript doesn't know about it
             (window.adsbygoogle = window.adsbygoogle || []).push({});
         } catch (error) {
             console.log("AdSense error:", error);
-        }
-    }, []);
+        }}, );
 
     return (
         <div>
@@ -19,7 +18,7 @@ const AdBanner = () => {
                 data-ad-slot="1234567890"
                 data-ad-format="auto"
                 data-full-width-responsive="true"
-            ></ins>
+            />
         </div>
     );
 };

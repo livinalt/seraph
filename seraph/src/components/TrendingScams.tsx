@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import ScamCard from "./ScamCard";
 
 const tabs = ["Trending", "New", "Most Checked"];

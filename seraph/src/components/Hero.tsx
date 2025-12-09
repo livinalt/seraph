@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import SearchBar from './SearchBar';
 
 const Hero = () => {
@@ -10,9 +10,9 @@ const Hero = () => {
     useEffect(() => {
         const currentWord = words[index % words.length];
 
-        let speed = isDeleting ? 50 : 120;
+        const speed = isDeleting ? 50 : 120;
 
-        let timeout = setTimeout(() => {
+        const timeout = setTimeout(() => {
             setDisplayed(prev => {
                 if (!isDeleting) {
                     // typing forward
@@ -34,7 +34,7 @@ const Hero = () => {
         }, speed);
 
         return () => clearTimeout(timeout);
-    }, [displayed, isDeleting, index]);
+    },);
 
     return (
         <section className="py-28 px-4 text-center bg-grid">
