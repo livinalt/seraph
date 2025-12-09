@@ -57,7 +57,7 @@ const ScamCard: React.FC<ScamCardProps> = ({
                         </div>
                     )}
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent" />
 
                     {/* Top Bar: AI Report + Entity Type */}
                     <div className="absolute top-2 left- left-2 right-2 flex justify-between items-center z-10">
@@ -105,7 +105,7 @@ const ScamCard: React.FC<ScamCardProps> = ({
                     <div className="mb-4">
                         <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
                             <div
-                                className="h-full bg-gradient-to-r from-red-600 to-green-500 transition-all"
+                                className="h-full bg-linear-to-r from-red-600 to-green-500 transition-all"
                                 style={{ width: `${communitySafe}%` }}
                             />
                         </div>
