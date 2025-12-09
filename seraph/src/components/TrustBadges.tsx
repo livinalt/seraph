@@ -1,24 +1,39 @@
+import { ShieldCheck, Cpu, Users, CheckCircle } from "lucide-react";
+
 const TrustBadges = () => {
     const badges = [
-        "10k+ Scans Daily",
-        "AI Risk Engine",
-        "Community Reports",
-        "Verified Sources"
+        { text: "10k+ Scans Daily", icon: <ShieldCheck size={16} /> },
+        { text: "AI Risk Engine", icon: <Cpu size={16} /> },
+        { text: "Community Reports", icon: <Users size={16} /> },
+        { text: "Verified Sources", icon: <CheckCircle size={16} /> },
     ];
 
     return (
-        <section className="py-20 bg-[#0f0f11] text-center">
-            <h2 className="text-2xl font-bold text-white mb-10">
+        <section className="py-16 bg-[#0d0d0e] text-center">
+            <h2 className="text-xl md:text-2xl font-semibold text-gray-200 mb-10 tracking-tight">
                 Trusted by Users Worldwide
             </h2>
 
-            <div className="flex flex-wrap justify-center gap-6">
-                {badges.map((b, i) => (
+            <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+                {badges.map((badge, index) => (
                     <div
-                        key={i}
-                        className="bg-[#161618] px-6 py-4 rounded-lg border border-gray-800 text-gray-300 text-sm shadow-md hover:border-yellow-400 transition-all"
+                        key={index}
+                        className="
+                            bg-[#141415] 
+                            border border-[#1f1f20]
+                            text-gray-300
+                            px-5 py-3
+                            rounded-md
+                            text-sm
+                            flex items-center gap-2
+                            shadow-sm
+                            transition-all duration-200
+                            hover:border-yellow-400/40
+                            hover:shadow-[0_0_15px_-4px_rgba(255,204,0,0.2)]
+                        "
                     >
-                        {b}
+                        {badge.icon}
+                        {badge.text}
                     </div>
                 ))}
             </div>

@@ -1,3 +1,10 @@
 @import "tailwindcss";
 
-
+/* Grid Background — Codecademy style */
+.grid-bg {
+  background-color: #0f1624; /* deep navy */
+  background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 22px 22px;
+}

@@ -6,18 +6,19 @@ import TrustBadges from './TrustBadges'
 import TrendingScams from './TrendingScams'
 import CTA from './CTA'
 import HowItWorks from './HowItWorks'
+import '../index.css'
 
 const HomePage = () => {
   return (
-    <>
+    <div className="grid-bg min-h-screen">
       <Header />
       <Hero />
-      <TrustBadges />
+      {/* <TrustBadges /> */}
       <TrendingScams />
       <HowItWorks />
       <CTA />
       <Footer />
-    </>
+    </div>
   )
 }
 

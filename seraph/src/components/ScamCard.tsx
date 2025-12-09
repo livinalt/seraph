@@ -1,115 +1,152 @@
+// ScamCard.tsx — Final Clean Version
 import React, { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { Users, FileText } from "lucide-react";
 
 interface ScamCardProps {
     title: string;
-    entityType: string; // e.g., "Token", "Website"
-    riskScore: number;  // 0-100
+    entityType: string;        // e.g. "Token", "Website", "Project"
     summary: string;
     tags: string[];
-    communitySafe: number;  // percentage (0–100)
+    communitySafe: number;
     explanation: string;
+    thumbnailUrl?: string;
+    logoUrl?: string;
+    reportedCount?: number;
 }
 
 const ScamCard: React.FC<ScamCardProps> = ({
     title,
     entityType,
-    riskScore,
     summary,
     tags,
     communitySafe,
-    explanation
+    explanation,
+    thumbnailUrl,
+    logoUrl,
+    reportedCount = 0,
 }) => {
-    const [open, setOpen] = useState(false);
+    const [imageLoading, setImageLoading] = useState(true);
+    const [showModal, setShowModal] = useState(false);
 
-    const getRiskColor = () => {
-        if (riskScore >= 80) return "bg-red-600 text-white";
-        if (riskScore >= 50) return "bg-orange-500 text-white";
-        if (riskScore >= 25) return "bg-yellow-400 text-black";
-        return "bg-green-500 text-white";
-    };
+
+    const formatReports = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : n);
 
     return (
-        <div className="bg-[#0F1624] border border-gray-700 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 max-w-xl mx-auto">
+        <>
+            <div className="group relative bg-[#0F1624] border border-gray-800 rounded-xl overflow-hidden hover:border-red-500/60 transition-all h-full flex flex-col">
+                {/* Thumbnail */}
+                <div className="relative h-32 bg-gray-900">
+                    {imageLoading && <div className="absolute inset-0 animate-pulse bg-gray-800" />}
 
-            {/* Header */}
-            <div className="flex justify-between items-center mb-3">
-                <span className={`px-3 py-1 rounded-full text-sm font-bold ${getRiskColor()}`}>
-                    {riskScore}/100 Risk
-                </span>
-
-                <span className="text-xs bg-blue-900/40 text-blue-300 px-3 py-1 rounded-full">
-                    {entityType}
-                </span>
-            </div>
-
-            {/* Title */}
-            <h2 className="text-xl font-semibold text-white mb-2">{title}</h2>
-
-            {/* Summary */}
-            <p className="text-gray-300 text-sm mb-4 leading-relaxed">
-                {summary}
-            </p>
-
-            {/* Tags */}
-            <div className="flex flex-wrap gap-2 mb-4">
-                {tags.map((tag, index) => (
-                    <span
-                        key={index}
-                        className="text-xs bg-gray-800 text-gray-300 py-1 px-2 rounded-md border border-gray-700"
-                    >
-                        {tag}
-                    </span>
-                ))}
-            </div>
-
-            {/* Community Rating */}
-            <div className="mb-4">
-                <p className="text-gray-400 text-xs mb-1">Community Rating</p>
-                <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
-                    <div
-                        className="h-full bg-blue-500"
-                        style={{ width: `${communitySafe}%` }}
-                    ></div>
-                </div>
-                <p className="text-gray-400 text-xs mt-1">{communitySafe}% say safe</p>
-            </div>
-
-            {/* Expandable Explanation */}
-            <div className="border-t border-gray-700 pt-3">
-                <button
-                    onClick={() => setOpen(!open)}
-                    className="flex items-center text-blue-300 text-sm hover:text-blue-400 transition"
-                >
-                    {open ? (
-                        <>
-                            <ChevronUp size={16} className="mr-1" /> Hide Details
-                        </>
+                    {thumbnailUrl ? (
+                        <img
+                            src={thumbnailUrl}
+                            alt={title}
+                            loading="lazy"
+                            onLoad={() => setImageLoading(false)}
+                            onError={() => setImageLoading(false)}
+                            className={`w-full h-full object-cover transition-opacity ${imageLoading ? "opacity-0" : "opacity-100"}`}
+                        />
+                    ) : logoUrl ? (
+                        <div className="flex items-center justify-center h-full">
+                            <img src={logoUrl} alt="logo" className="h-16 w-16 object-contain" />
+                        </div>
                     ) : (
-                        <>
-                            <ChevronDown size={16} className="mr-1" /> Show AI Explanation
-                        </>
+                        <div className="flex items-center justify-center h-full text-5xl font-bold text-gray-700">
+                            {title[0]}
+                        </div>
                     )}
-                </button>
 
-                {open && (
-                    <p className="text-gray-300 text-sm mt-3 leading-relaxed">
-                        {explanation}
-                    </p>
-                )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+
+                    {/* Top Bar: AI Report + Entity Type */}
+                    <div className="absolute top-2 left- left-2 right-2 flex justify-between items-center z-10">
+                        {/* AI Report Button */}
+                        <button
+                            onClick={() => setShowModal(true)}
+                            className="flex items-center gap-1.5 bg-black/70 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-black/90 transition"
+                        >
+                            <FileText size={14} />
+                            AI Report
+                        </button>
+
+                        {/* Entity Type */}
+                        <span className="text-xs bg-gray-800/80 text-gray-300 px-3 py-1.5 rounded-lg font-medium backdrop-blur-sm">
+                            {entityType}
+                        </span>
+                    </div>
+
+                    {/* Reported Badge */}
+                    {reportedCount > 0 && (
+                        <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/70 text-white text-xs px-2 py-1 rounded-full backdrop-blur">
+                            <Users size={12} />
+                            {formatReports(reportedCount)} reported
+                        </div>
+                    )}
+
+                </div>
+
+                {/* Card Body - Minimal & Fast */}
+                <div className="p-4 flex flex-col flex-1">
+                    <h3 className="font-semibold text-white line-clamp-1 mb-2 text-base">{title}</h3>
+                    <p className="text-gray-400 text-xs line-clamp-2 mb-4">{summary}</p>
+
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                        {tags.slice(0, 3).map((tag, i) => (
+                            <span key={i} className="text-[10px] bg-gray-800 text-gray-300 px-2 py-0.5 rounded border border-gray-700">
+                                {tag}
+                            </span>
+                        ))}
+                        {tags.length > 3 && <span className="text-[10px] text-gray-500">+{tags.length - 3}</span>}
+                    </div>
+
+                    {/* Community Bar */}
+                    <div className="mb-4">
+                        <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-gradient-to-r from-red-600 to-green-500 transition-all"
+                                style={{ width: `${communitySafe}%` }}
+                            />
+                        </div>
+                        <p className="text-[10px] text-gray-500 mt-1">{communitySafe}% say safe</p>
+                    </div>
+
+                    <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition">
+                        View Full Report
+                    </button>
+                </div>
             </div>
 
-            {/* Footer Buttons */}
-            <div className="flex gap-3 mt-6">
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm rounded-lg transition">
-                    View Full Report
-                </button>
+            {/* AI Analysis Modal (unchanged) */}
+            {showModal && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
+                    <div
+                        className="bg-[#0F1624] border border-gray-700 rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
 
-                <button className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 text-sm rounded-lg transition">
-                    Share
-                </button>
-            </div>
-        </div>
+                        <div className="flex justify-between items-center mb-5">
+                            <h2 className="text-xl font-bold text-white flex items-center gap-3">
+                                AI Scam Analysis
+                            </h2>
+                            <button onClick={() => setShowModal(false)} className="text-3xl text-gray-400 hover:text-white">
+                                ×
+                            </button>
+                        </div>
+                        <div className="text-gray-300 text-sm leading-relaxed space-y-3">
+                            <p>{explanation}</p>
+                        </div>
+                        <button
+                            onClick={() => setShowModal(false)}
+                            className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 

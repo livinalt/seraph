@@ -1,44 +1,78 @@
 import React, { useState } from "react";
+import ScamCard from "./ScamCard";
 
 const tabs = ["Trending", "New", "Most Checked"];
 
-const trendingItems = [
-    "Crypto Rugpulls",
-    "Fake Airdrops",
-    "Investment Scams",
-    "AI-Generated Scams",
-    "DeFi Exploits",
-    "Phishing Websites",
-    "Ponzi Schemes",
-    "Malicious Tokens",
-    "Fake Exchanges",
-    "Honeypot Tokens",
-    "Pump & Dump",
-    "Telegram Bot Scams",
+const trendingScams = [
+    {
+        title: "FakeToken XYZ",
+        entityType: "Token",
+        riskScore: 95,
+        summary: "Classic rugpull: liquidity removed 2 hours after launch.",
+        tags: ["Rugpull", "Honeypot", "Malicious Token"],
+        communitySafe: 3,
+        explanation: "Owner wallet drained the entire liquidity pool after heavy marketing. Contract had hidden mint + disable-sell functions.",
+        reportedCount: 3420,
+    },
+    {
+        title: "FreeCryptoAirdrop.live",
+        entityType: "Website",
+        riskScore: 89,
+        summary: "Fake airdrop site that steals wallet private keys.",
+        tags: ["Phishing", "Fake Airdrop", "Wallet Drainer"],
+        communitySafe: 7,
+        explanation: "Malicious script forces unlimited approvals and signs malicious transactions when you 'claim'.",
+        reportedCount: 2890,
+    },
+    {
+        title: "Quantum Yield Fund",
+        entityType: "Project",
+        riskScore: 93,
+        summary: "Ponzi promising 10% daily returns with no real product.",
+        tags: ["Ponzi", "Investment Scam", "Fake Staking"],
+        communitySafe: 5,
+        explanation: "No audited code, anonymous team, payments only from new deposits. Already stopping withdrawals.",
+        reportedCount: 5670,
+    },
+    {
+        title: "DeepFake Elon Giveaway",
+        entityType: "Video/Website",
+        riskScore: 81,
+        summary: "AI deepfake video of Elon Musk giving away ETH.",
+        tags: ["Deepfake", "Giveaway Scam", "Phishing"],
+        communitySafe: 12,
+        explanation: "Video hosted on scam domain that asks users to send ETH first to 'double it'. Over 200 victims reported.",
+        reportedCount: 12400,
+    },
+    // Add more as needed
 ];
 
 const TrendingScams = () => {
     const [activeTab, setActiveTab] = useState("Trending");
 
-    return (
-        <section className="w-full flex justify-center py-20 bg-[#02040A] relative">
-            {/* grid background */}
-            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
+    const scamsToShow = trendingScams;
 
-            <div className="w-full max-w-5xl px-6 relative z-10">
-                <h2 className="text-white text-2xl font-semibold mb-6">
-                    Trending scam checks
+    return (
+        <section className="w-full py-24 bg-[#02040A] relative overflow-hidden">
+            {/* Subtle grid background */}
+            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10 pointer-events-none" />
+
+            {/* Main container with generous side margins */}
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 relative z-10">
+                {/* Title */}
+                <h2 className="text-3xl sm:text-4xl font-bold text-white text-center mb-12">
+                    Trending Scam Reports
                 </h2>
 
                 {/* Tabs */}
-                <div className="flex gap-6 border-b border-gray-700 pb-2 mb-6">
+                <div className="flex justify-center gap-10 border-b border-gray-800 pb-4 mb-12">
                     {tabs.map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`text-sm pb-2 transition-all ${activeTab === tab
-                                    ? "text-yellow-400 border-b-2 border-yellow-400"
-                                    : "text-gray-400 hover:text-white"
+                            className={`text-lg font-medium transition-all pb-3 ${activeTab === tab
+                                    ? "text-yellow-400 border-b-3 border-yellow-400"
+                                    : "text-gray-500 hover:text-gray-300"
                                 }`}
                         >
                             {tab}
@@ -46,23 +80,21 @@ const TrendingScams = () => {
                     ))}
                 </div>
 
-                {/* Items Grid */}
-                <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
-                    {trendingItems.map((item) => (
-                        <button
-                            key={item}
-                            className="flex items-center gap-3 bg-[#0A0E1A] border border-gray-800 hover:border-yellow-400 transition-all px-4 py-3 rounded-lg"
-                        >
-                            <span className="text-yellow-400 text-lg">⚠️</span>
-                            <span className="text-white text-sm">{item}</span>
-                        </button>
+                {/* Cards Grid - Equal height + nice spacing */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 auto-rows-fr">
+                    {scamsToShow.map((scam, index) => (
+                        <ScamCard
+                            key={index}
+                            {...scam}
+                            reportedCount={scam.reportedCount}
+                        />
                     ))}
                 </div>
 
-                {/* Footer link */}
-                <div className="text-center mt-10">
-                    <button className="text-yellow-400 text-sm hover:underline">
-                        Explore more scam categories →
+                {/* Load more */}
+                <div className="text-center mt-16">
+                    <button className="text-yellow-400 text-lg font-medium hover:underline transition">
+                        Load more reports
                     </button>
                 </div>
             </div>
