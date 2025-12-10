@@ -35,11 +35,11 @@ const SearchBar = () => {
             </div>
 
             {/* Search Bar */}
-            <div className="flex w-full max-w-2xl bg-[#111] border border-gray-700 rounded-xl overflow-hidden shadow-lg shadow-yellow-500/10">
+            <div className="flex w-full max-w-2xl bg-[#FBFBFB] border border-gray-300 rounded-xl overflow-hidden shadow-lg shadow-yellow-500/10">
                 <input
                     type="text"
                     placeholder={`Search by ${active}...`}
-                    className="grow p-4 bg-transparent text-gray-200 outline-none"
+                    className="grow p-4 bg-transparent text-gray-800 outline-none"
                 />
 
                 <button className="bg-yellow-400 text-black px-6 font-semibold hover:bg-yellow-300 transition">

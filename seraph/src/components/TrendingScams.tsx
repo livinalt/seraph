@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ScamCard from "./ScamCard";
 
-const tabs = ["Trending", "New", "Most Checked"];
+// const tabs = ["Trending", "New", "Most Checked"];
 
 const trendingScams = [
     {
@@ -48,7 +48,7 @@ const trendingScams = [
 ];
 
 const TrendingScams = () => {
-    const [activeTab, setActiveTab] = useState("Trending");
+    // const [activeTab, setActiveTab] = useState("Trending");
 
     const scamsToShow = trendingScams;
 
@@ -60,25 +60,11 @@ const TrendingScams = () => {
             {/* Main container with generous side margins */}
             <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 relative z-10">
                 {/* Title */}
-                <h2 className="text-3xl sm:text-4xl font-bold text-white text-center mb-12">
-                    Trending Scam Reports
+                <h2 className="text-3xl sm:text-4xl font-bold text-white text-left mb-12">
+                    New Reports
                 </h2>
 
-                {/* Tabs */}
-                <div className="flex justify-center gap-10 border-b border-gray-800 pb-4 mb-12">
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`text-lg font-medium transition-all pb-3 ${activeTab === tab
-                                    ? "text-yellow-400 border-b-3 border-yellow-400"
-                                    : "text-gray-500 hover:text-gray-300"
-                                }`}
-                        >
-                            {tab}
-                        </button>
-                    ))}
-                </div>
+               
 
                 {/* Cards Grid - Equal height + nice spacing */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 auto-rows-fr">
