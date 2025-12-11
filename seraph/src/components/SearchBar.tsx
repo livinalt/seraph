@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FileCode, Globe, Users, Layers, Coins } from "lucide-react"; // icons added
+import { useNavigate } from "react-router-dom";
 
 const SearchBar = () => {
     const [active, setActive] = useState("website");
@@ -11,6 +12,13 @@ const SearchBar = () => {
         { id: "project", label: "Project", icon: <Layers size={14} /> },
         { id: "token", label: "Token", icon: <Coins size={14} /> },
     ];
+
+    
+    const navigate = useNavigate();
+    
+    const handleScan = () => {
+            navigate("/scan");
+    }
 
     return (
         <div className="flex flex-col items-center mt-10">
@@ -42,7 +50,9 @@ const SearchBar = () => {
                     className="grow p-4 bg-transparent text-gray-800 outline-none"
                 />
 
-                <button className="bg-yellow-400 text-black px-6 font-semibold hover:bg-yellow-300 transition">
+                <button 
+                    onClick={handleScan}
+                className="bg-yellow-400 text-black px-6 font-semibold hover:bg-yellow-300 transition">
                     Scan Now
                 </button>
             </div>
