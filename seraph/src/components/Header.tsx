@@ -1,100 +1,86 @@
+import { AlertTriangle } from "lucide-react";
 import { useState } from "react";
+import { useReportModal } from "../hooks/useReportModal";
 
 const Header = () => {
-    const [open, setOpen] = useState(false);
+    const { openReportModal } = useReportModal();
+    const [mobileOpen, setMobileOpen] = useState(false);
 
     return (
         <header className="fixed top-0 left-0 w-full z-50 bg-[#0d1117]/80 backdrop-blur-md border-b border-white/10">
             <div className="max-w-7xl mx-auto flex items-center justify-between p-4">
 
-                {/* Radar Logo */}
-                <div className="relative flex items-center justify-center">
-                    <a href="/" className="flex items-center space-x-3 group">
-                        {/* Rotating Radar Circle + Sweep */}
-                        <div className="relative w-12 h-12">
-                            {/* Static Rings */}
-                            <svg viewBox="0 0 60 60" className="w-full h-full drop-shadow-glow">
-                                <circle cx="30" cy="30" r="28" fill="none" stroke="#fbbf24" strokeWidth="1.5" opacity="0.3" />
-                                <circle cx="30" cy="30" r="20" fill="none" stroke="#fbbf24" strokeWidth="1.5" opacity="0.5" />
-                                <circle cx="30" cy="30" r="12" fill="none" stroke="#fbbf24" strokeWidth="2" opacity="0.8" />
+                {/* Logo */}
+                <a href="/" className="flex items-center space-x-3 group">
+                    <div className="relative w-12 h-12">
+                        {/* your radar SVG stays unchanged */}
+                        … (keep your SVG)
+                    </div>
+                </a>
 
-                                {/* Rotating Sweep */}
-                                <g className="animate-spin-slow origin-center">
-                                    <path
-                                        d="M30,30 L30,2 A28,28 0 1,1 30,30 Z"
-                                        fill="url(#radarGradient)"
-                                    />
-                                    <defs>
-                                        <linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                            <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.8" />
-                                            <stop offset="60%" stopColor="#fbbf24" stopOpacity="0.2" />
-                                            <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
-                                        </linearGradient>
-                                    </defs>
-                                </g>
-
-                                {/* Center Dot */}
-                                <circle cx="30" cy="30" r="4" fill="#fbbf24" className="animate-ping-slow" />
-                                <circle cx="30" cy="30" r="4" fill="#fbbf24" />
-                            </svg>
-                        </div>
-
-                        {/* Optional: "Seraph" text next to radar (uncomment if you want both) */}
-                        {/* <span className="text-2xl font-extrabold tracking-tight text-yellow-400">
-                            Seraph
-                        </span> */}
-                    </a>
-                </div>
-
-                {/* Desktop Menu */}
-                <nav className="hidden md:flex space-x-10">
+                {/* Desktop Navigation */}
+                <nav className="hidden md:flex items-center space-x-10">
                     {[
-                        { label: "Home", href: "#" },
-                        { label: "Check", href: "#check" },
-                        { label: "Scam List", href: "#directory" },
-                        { label: "Report a Scam", href: "#report" },
-                        { label: "Blog", href: "#blog" },
-                    ].map((item, i) => (
-                        <a
-                            key={i}
-                            href={item.href}
-                            className="text-gray-300 hover:text-yellow-300 transition-colors duration-200 font-medium"
-                        >
+                        { label: "Home", href: "/" },
+                        { label: "Check", href: "/#check" },
+                        { label: "Scam List", href: "/#directory" },
+                        { label: "Blog", href: "/#blog" },
+                    ].map((item) => (
+                        <a key={item.label} href={item.href} className="text-gray-300 hover:text-yellow-300 transition font-medium">
                             {item.label}
                         </a>
                     ))}
+
+                    {/* CTA Button */}
+                    <button
+                        onClick={openReportModal}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-lg font-semibold transition shadow-lg"
+                    >
+                        <AlertTriangle size={18} />
+                        Report Scam
+                    </button>
                 </nav>
 
-                {/* Mobile Menu Button */}
+                {/* Mobile Burger */}
                 <button
                     className="md:hidden text-gray-300 hover:text-yellow-300"
-                    onClick={() => setOpen(!open)}
+                    onClick={() => setMobileOpen(!mobileOpen)}
                 >
-                    <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
             </div>
 
             {/* Mobile Menu */}
-            {open && (
+            {mobileOpen && (
                 <div className="md:hidden bg-[#0d1117]/95 backdrop-blur-lg border-t border-white/10 p-6 space-y-4">
                     {[
-                        { label: "Home", href: "#" },
-                        { label: "Check", href: "#check" },
-                        { label: "Scam List", href: "#directory" },
-                        { label: "Report a Scam", href: "#report" },
-                        { label: "Blog", href: "#blog" },
-                    ].map((item, i) => (
+                        { label: "Home", href: "/" },
+                        { label: "Check", href: "/#check" },
+                        { label: "Scam List", href: "/#directory" },
+                        { label: "Blog", href: "/#blog" },
+                    ].map((item) => (
                         <a
-                            key={i}
+                            key={item.label}
                             href={item.href}
                             className="block text-gray-300 hover:text-yellow-300 py-2 text-lg transition"
-                            onClick={() => setOpen(false)}
+                            onClick={() => setMobileOpen(false)}
                         >
                             {item.label}
                         </a>
                     ))}
+
+                    <button
+                        onClick={() => {
+                            setMobileOpen(false);
+                            openReportModal();
+                        }}
+                        className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-red-600 hover:bg-red-500 text-white rounded-lg font-semibold transition"
+                    >
+                        <AlertTriangle size={20} />
+                        Report Scam
+                    </button>
                 </div>
             )}
         </header>

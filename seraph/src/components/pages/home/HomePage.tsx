@@ -1,13 +1,13 @@
 // import React from 'react'
-import Header from './Header'
+import Header from '../../Header'
 import Hero from './Hero'
-import Footer from './Footer'
+import Footer from '../../Footer'
 // import TrustBadges from './TrustBadges'
-import TrendingScams from './TrendingScams'
-import CTA from './CTA'
-import HowItWorks from './HowItWorks'
-import '../index.css'
-import AdBanner from './ads/AdBanner'
+import TrendingScams from '../../TrendingScams'
+import CTA from '../../CTA'
+import HowItWorks from '../../HowItWorks'
+import '../../../index.css'
+import AdBanner from '../../ads/AdBanner'
 
 const HomePage = () => {
   return (
@@ -15,7 +15,7 @@ const HomePage = () => {
       <Header />
       <Hero />
 
-            {/* Ad placement under hero */}
+      {/* Ad placement under hero */}
       <div className="my-8 flex justify-center">
         <AdBanner />
       </div>

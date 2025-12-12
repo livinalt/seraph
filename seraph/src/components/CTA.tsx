@@ -1,4 +1,4 @@
-import React from "react";
+// import React from "react";
 
 const CTA = () => {
     return (
@@ -37,7 +37,7 @@ const CTA = () => {
                 </button>
 
                 {/* Light sweep animation */}
-                <div className="absolute top-0 left-1/2 w-[140%] h-[200%] bg-linear-to-r from-transparent via-white/5 to-transparent rotate-[25deg] animate-sweep"></div>
+                <div className="absolute top-0 left-1/2 w-[140%] h-[200%] bg-linear-to-r from-transparent via-white/5 to-transparent rotate-25 animate-sweep"></div>
 
             </div>
         </section>

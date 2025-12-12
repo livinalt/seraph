@@ -1,4 +1,4 @@
-import { useState } from "react";
+// import { useState } from "react";
 import { ShieldCheck, Search, AlertTriangle } from "lucide-react";
 
 const HowItWorks = () => {

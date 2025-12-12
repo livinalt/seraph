@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import SearchBar from './SearchBar';
+import SearchBar from '../../SearchBar';
 
 const Hero = () => {
     const words = ["Scan any project", "Verify any project", "Check any project", "Protect"];
@@ -40,7 +40,7 @@ const Hero = () => {
         <section className="py-28 px-4 text-center bg-grid">
             <div className="max-w-4xl mx-auto">
 
-                <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
+                <h1 className="mt-20 text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
                     <span className="bg-yellow-400 text-black px-2">{displayed}</span><br />
                     <span className="text-yellow-400">Stay protected.</span>
                 </h1>
