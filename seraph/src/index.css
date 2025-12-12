@@ -23,3 +23,17 @@
   animation: sweep 6s linear infinite;
 }
 
+/* logo css and animations */
+@layer utilities {
+  .animate-spin-slow {
+    animation: spin 8s linear infinite;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { filter: drop-shadow(0 0 8px #fbbf24); }
+  50% { filter: drop-shadow(0 0 20px #f59e0b); }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}

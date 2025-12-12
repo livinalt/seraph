@@ -2,6 +2,7 @@ import './App.css';
 import { Routes, Route } from "react-router-dom";
 import HomePage from "./components/pages/home/HomePage";
 import ScanPage from "./components/ScanPage";
+import ScamDirectory from './components/pages/scamDirectory/ScamDirectory';
 
 function App() {
   const handleOpenReport = () => {
@@ -13,6 +14,7 @@ function App() {
     <>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/scamDirectory" element={<ScamDirectory />} />
         {/* Example with fake domain */}
         <Route
           path="/scan"
