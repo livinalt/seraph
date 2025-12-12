@@ -19,42 +19,41 @@ const ScanPage = ({ query }: ScanPageProps) => {
 const ScanContent = ({ query }: { query: string }) => {
     const [tick, setTick] = useState(0);
     const [screenshot, setScreenshot] = useState<string | null>(null);
-    const [screenshotError, setScreenshotError] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
 
+    // Fake scanning animation (4 seconds)
     useEffect(() => {
-        const interval = setInterval(() => setTick(t => t + 1), 200);
+        const interval = setInterval(() => setTick((t) => t + 1), 200);
         return () => clearInterval(interval);
     }, []);
 
     const isLoading = tick < 20;
 
-    // Screenshot fetch
+    // Fetch screenshot from Microlink
     useEffect(() => {
         if (!query?.trim()) return;
+
         const fetchScreenshot = async () => {
             try {
-                const url = `https://api.microlink.io?url=${encodeURIComponent(query)}&screenshot=true&meta=false&embed=screenshot.url`;
+                const url = `https://api.microlink.io?url=${encodeURIComponent(
+                    query
+                )}&screenshot=true&meta=false&embed=screenshot.url`;
                 const res = await fetch(url);
                 const data = await res.json();
-                setScreenshot(data?.data?.screenshot?.url || null);
-                if (!data?.data?.screenshot?.url) setScreenshotError(true);
-            } catch {
-                setScreenshotError(true);
+                setScreenshot(data?.data?.screenshot?.url ?? null);
+            } catch (err) {
+                console.error("Screenshot fetch failed:", err);
+                setScreenshot(null);
             }
         };
+
         fetchScreenshot();
     }, [query]);
 
-    // AUTO REPORT HANDLER — Instant submit
+    // Instant report (in real app this would POST to your backend
     const handleReport = () => {
-        // In real app: send to backend here
-        console.log("Reported:", query);
-
-        // Show success instantly
+        console.log("Reported scam:", query);
         setShowSuccess(true);
-
-        // Auto close after 4 seconds (optional)
         setTimeout(() => setShowSuccess(false), 4000);
     };
 
@@ -64,7 +63,8 @@ const ScanContent = ({ query }: { query: string }) => {
 
             <div className="min-h-screen bg-[#0b0b0c] text-white px-6 py-14 flex flex-col items-center">
                 <h1 className="mt-24 text-3xl md:text-4xl font-bold mb-3 text-center">
-                    Scan Status for: <span className="text-yellow-400">{query || "example.com"}</span>
+                    Scan Status for:{" "}
+                    <span className="text-yellow-400">{query || "example.com"}</span>
                 </h1>
 
                 <p className="text-gray-400 mb-12 text-center max-w-lg">
@@ -79,26 +79,42 @@ const ScanContent = ({ query }: { query: string }) => {
                             </div>
                             <div className="absolute inset-0 rounded-full bg-yellow-500/5 blur-2xl animate-ping" />
                         </div>
+
                         <div className="text-gray-400 text-sm text-center max-w-md">
-                            {["Analyzing domain reputation…", "Checking smart contract…", "Scanning for scam patterns…", "Cross-checking reports…", "Finalizing verdict…"][Math.floor(tick / 4)]}
+                            {[
+                                "Analyzing domain reputation…",
+                                "Checking smart contract…",
+                                "Scanning for scam patterns…",
+                                "Cross-checking reports…",
+                                "Finalizing verdict…",
+                            ][Math.floor(tick / 4)]}
                         </div>
+
                         <Loader2 className="mt-8 text-yellow-400 animate-spin" size={30} />
                     </div>
                 ) : (
                     <div className="w-full max-w-5xl">
-                        {/* Screenshot */}
+                        {/* Website Preview */}
                         <div className="mb-10">
                             <h3 className="text-lg font-semibold mb-3">Website Preview</h3>
                             <div className="rounded-xl overflow-hidden border border-gray-800 bg-[#131316] p-3">
                                 {screenshot ? (
-                                    <img src={screenshot} alt="Screenshot" className="rounded-lg w-full max-h-96 object-cover" />
+                                    <img
+                                        src={screenshot}
+                                        alt="Website screenshot"
+                                        className="rounded-lg w-full max-h-96 object-cover"
+                                    />
                                 ) : (
-                                    <div className="text-gray-500 text-center py-16">Could not load screenshot</div>
+                                    <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+                                        <ShieldAlert className="w-12 h-12 mb-3 opacity-60" />
+                                        <p>Could not load website preview</p>
+                                        <p className="text-xs mt-2">The site may block screenshots or be unreachable</p>
+                                    </div>
                                 )}
                             </div>
                         </div>
 
-                        {/* Risk */}
+                        {/* Risk Verdict */}
                         <div className="p-8 rounded-2xl bg-[#131316] border border-red-500/30 shadow-xl text-center mb-10">
                             <ShieldAlert className="w-16 h-16 text-red-500 mx-auto mb-4" />
                             <h2 className="text-3xl font-bold mb-2">High Risk</h2>
@@ -113,14 +129,17 @@ const ScanContent = ({ query }: { query: string }) => {
                                 "No team verification",
                                 "Associated with flagged addresses",
                             ].map((flag, i) => (
-                                <div key={i} className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 flex items-center gap-3">
+                                <div
+                                    key={i}
+                                    className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 flex items-center gap-3"
+                                >
                                     <AlertTriangle className="text-red-400" size={20} />
                                     <span className="text-sm text-gray-300">{flag}</span>
                                 </div>
                             ))}
                         </div>
 
-                        {/* Report Button — AUTO SUBMIT */}
+                        {/* Report Button */}
                         <div className="text-center">
                             <button
                                 onClick={handleReport}
@@ -136,7 +155,7 @@ const ScanContent = ({ query }: { query: string }) => {
                 )}
             </div>
 
-            {/* Success Modal — Auto Report Confirmation */}
+            {/* Success Modal */}
             <ReportSuccessModal
                 isOpen={showSuccess}
                 onClose={() => setShowSuccess(false)}
