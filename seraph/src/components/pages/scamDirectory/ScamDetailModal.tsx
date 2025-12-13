@@ -1,17 +1,23 @@
+// src/components/scamDirectory/ScamDetailModal.tsx
 import { X } from "lucide-react";
 
 interface ScamItem {
-    title: string;
+    id: number;
     name: string;
-    screenshot: string;
+    title: string;
     summary: string;
+    category: string;
     tags: string[];
     reports: number;
-    firstSeen: string | Date;
+    firstSeen: string;
+    screenshot: string;
+    communitySafe: number;
+    explanation: string;
+    logoUrl: string;
 }
 
 interface ScamDetailModalProps {
-    item: ScamItem;
+    item: ScamItem | null;
     onClose: () => void;
 }
 
@@ -35,13 +41,12 @@ export const ScamDetailModal = ({ item, onClose }: ScamDetailModalProps) => {
                             <h2 className="text-2xl font-bold text-white">{item.title}</h2>
                             <p className="text-gray-400">{item.name}</p>
                         </div>
-                        
                     </div>
 
                     <img
                         src={item.screenshot}
                         alt={item.name}
-                        className="w-full h-64 object-cover rounded-xl mb-6"
+                        className="w-full rounded-xl mb-6 object-contain max-h-96 bg-black"
                     />
 
                     <div className="grid md:grid-cols-2 gap-8">
@@ -49,13 +54,16 @@ export const ScamDetailModal = ({ item, onClose }: ScamDetailModalProps) => {
                             <h3 className="text-lg font-semibold mb-3">Summary</h3>
                             <p className="text-gray-300 leading-relaxed">{item.summary}</p>
 
+                            <h3 className="text-lg font-semibold mt-8 mb-3">AI Explanation</h3>
+                            <p className="text-gray-300 leading-relaxed">{item.explanation}</p>
+
                             <div className="mt-6">
                                 <h4 className="text-sm font-medium text-gray-400 mb-2">Tags</h4>
                                 <div className="flex flex-wrap gap-2">
-                                    {item.tags.map((tag: string) => (
+                                    {item.tags.map((tag) => (
                                         <span
                                             key={tag}
-                                            className="px-3 py-1 text-xs rounded-full bg-[#1a1a1c] border border-white/10 text-gray-300"
+                                            className="px-3 py-1 text-xs rounded-full bg-red-500/20 text-red-400 border border-red-500/30"
                                         >
                                             {tag}
                                         </span>
@@ -68,15 +76,25 @@ export const ScamDetailModal = ({ item, onClose }: ScamDetailModalProps) => {
                             <div className="bg-[#131316] rounded-xl p-6 border border-white/10">
                                 <div className="text-sm text-gray-400">Total Reports</div>
                                 <div className="text-3xl font-bold text-white mt-1">{item.reports}</div>
-                                <div className="text-xs text-gray-500 mt-1">
-                                    First seen: {new Date(item.firstSeen).toLocaleDateString()}
+
+                                <div className="text-sm text-gray-400 mt-4">Community Safety Score</div>
+                                <div className="text-2xl font-bold text-yellow-400 mt-1">
+                                    {item.communitySafe}/100
                                 </div>
 
-                                <div className="mt-6 space-y-3">
+                                <div className="text-xs text-gray-500 mt-4">
+                                    First seen: {new Date(item.firstSeen).toLocaleDateString("en-US", {
+                                        month: "long",
+                                        day: "numeric",
+                                        year: "numeric",
+                                    })}
+                                </div>
+
+                                <div className="mt-8 space-y-3">
                                     <button className="w-full py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-300 transition">
                                         View Full Report
                                     </button>
-                                    <button className="w-full py-3 bg-[#1a1a1c] text-gray-300 border border-white/10 rounded-lg">
+                                    <button className="w-full py-3 bg-[#1a1a1c] text-gray-300 border border-white/10 rounded-lg hover:bg-white/5 transition">
                                         Share Report
                                     </button>
                                     <button className="w-full py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-500 transition">

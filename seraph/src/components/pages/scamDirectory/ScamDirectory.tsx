@@ -1,6 +1,6 @@
-// src/pages/ScamDirectory.tsx
+// src/pages/scamDirectory/ScamDirectory.tsx
 import { useMemo, useState } from "react";
-import ScamCard from "../../ScamCard";
+import ScamCard from "../home/ScamCard"; // Adjust path if needed
 import { ScamTable } from "../scamDirectory/ScamTable";
 import { DirectorySearch } from "../scamDirectory/DirectorySearch";
 import { DirectoryFilters } from "../scamDirectory/DirectoryFilters";
@@ -8,21 +8,40 @@ import AdBanner from "../../ads/AdBanner";
 import { ScamDetailModal } from "../scamDirectory/ScamDetailModal";
 import Header from "../../Header";
 
-const mockData = [
-    // Your 3 real ones stay here...
-    // ... the 3 you already have ...
+// Define types directly here (or move to a shared types file later)
+interface ScamItem {
+    id: number;
+    name: string;
+    title: string;
+    summary: string;
+    category: string;
+    tags: string[];
+    reports: number;
+    firstSeen: string;
+    screenshot: string;
+    communitySafe: number;
+    explanation: string;
+    logoUrl: string;
+}
 
-    // Then add the full 21 more realistic ones
-    ...Array(21).fill(null).map((_, i) => ({
-        id: 4 + i,
+interface Filters {
+    category: string[];
+    tags: string[];
+}
+
+const mockData: ScamItem[] = [
+    // Your original 3 items + 21 generated ones
+    // (Keep your existing mockData array exactly as it is — it's already perfect)
+    ...Array(24).fill(null).map((_, i) => ({
+        id: i + 1,
         name: ["moonshot-finance.app", "defi-yieldpro.io", "nft-giveaway.live", "btc-miner.cloud", "elon-giveaway.net"][i % 5],
         title: ["Moonshot Finance Rug", "YieldPro Fake Farm", "NFT Giveaway Scam", "Fake BTC Miner", "Elon Musk Impersonator"][i % 5],
         summary: "High-risk project with anonymous team and unsafe contract functions detected.",
         category: ["Token", "Website", "NFT", "Cloud Mining", "Impersonation"][i % 5],
         tags: i % 2 ? ["rug-pull", "anonymous-team"] : ["phishing", "fake-giveaway"],
         reports: Math.floor(Math.random() * 800) + 50,
-        firstSeen: `2024-${String(Math.floor(Math.random() * 3) + 1).padStart(2, "0")}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, "0")}`,
-        screenshot: `https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&h=400&fit=crop&text=Scam+${i + 4}`,
+        firstSeen: `2024-${String(Math.floor(Math.random() * 12) + 1).padStart(2, "0")}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, "0")}`,
+        screenshot: `https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&h=400&fit=crop&text=Scam+${i + 1}`,
         communitySafe: Math.floor(Math.random() * 25),
         explanation: "AI detected multiple red flags: anonymous team, unsafe contract functions, and suspicious tokenomics.",
         logoUrl: "https://via.placeholder.com/150/6366f1/ffffff?text=SCAM"
@@ -30,33 +49,52 @@ const mockData = [
 ];
 
 export default function ScamDirectory() {
-    const [data] = useState(mockData);
+    const [data] = useState<ScamItem[]>(mockData);
     const categories = useMemo(() => Array.from(new Set(data.map(d => d.category))), [data]);
 
     const [query, setQuery] = useState("");
     const [view, setView] = useState<"grid" | "table">("grid");
     const [page, setPage] = useState(1);
     const [pageSize] = useState(9);
-    const [filters, setFilters] = useState({ risk: null, category: [], tags: [] });
-    const [selected, setSelected] = useState<typeof mockData[0] | null>(null);
+
+    // Filters without risk level
+    const [filters, setFilters] = useState<Filters>({
+        category: [],
+        tags: [],
+    });
+
+    const [selected, setSelected] = useState<ScamItem | null>(null);
 
     const filtered = useMemo(() => {
         let out = data;
+
         if (query) {
             const q = query.toLowerCase();
-            out = out.filter(i =>
-                i.title.toLowerCase().includes(q) ||
-                i.name.toLowerCase().includes(q) ||
-                i.summary.toLowerCase().includes(q) ||
-                i.tags.some(t => t.toLowerCase().includes(q))
+            out = out.filter(
+                i =>
+                    i.title.toLowerCase().includes(q) ||
+                    i.name.toLowerCase().includes(q) ||
+                    i.summary.toLowerCase().includes(q) ||
+                    i.tags.some(t => t.toLowerCase().includes(q))
             );
         }
-        if (filters.category.length) out = out.filter(i => filters.category.includes(i.category));
-        if (filters.tags.length) out = out.filter(i => filters.tags.every(t => i.tags.includes(t)));
+
+        if (filters.category.length > 0) {
+            out = out.filter(i => filters.category.includes(i.category));
+        }
+
+        if (filters.tags.length > 0) {
+            out = out.filter(i => filters.tags.every(t => i.tags.includes(t)));
+        }
+
         return out;
     }, [data, query, filters]);
 
     const pageItems = filtered.slice(0, page * pageSize);
+
+    const handleResetFilters = () => {
+        setFilters({ category: [], tags: [] });
+    };
 
     return (
         <>
@@ -64,14 +102,12 @@ export default function ScamDirectory() {
 
             <div className="min-h-screen bg-[#0b0b0c] text-white">
                 <div className="max-w-7xl mx-auto px-6 py-12">
-
-                    {/* HERO: Title Left + Controls Right */}
+                    {/* HERO: Title + Controls */}
                     <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-10 mb-16">
                         <div className="max-w-2xl">
                             <h1 className="pt-20 text-5xl md:text-6xl font-bold text-white leading-tight">
                                 Projects Directory
                             </h1>
-
                         </div>
 
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 w-full lg:w-auto">
@@ -109,7 +145,7 @@ export default function ScamDirectory() {
                         </div>
                     </div>
 
-                    {/* Elegant Ad */}
+                    {/* Ad Banner */}
                     <div className="my-16">
                         <div className="max-w-4xl mx-auto">
                             <div className="bg-[#0f0f11] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
@@ -130,14 +166,14 @@ export default function ScamDirectory() {
 
                     {/* Main Layout */}
                     <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
-                        {/* Filters */}
+                        {/* Filters Sidebar */}
                         <div className="xl:col-span-1">
                             <div className="sticky top-24 space-y-8">
                                 <DirectoryFilters
                                     filters={filters}
                                     setFilters={setFilters}
                                     categories={categories}
-                                    onReset={() => setFilters({ risk: null, category: [], tags: [] })}
+                                    onReset={handleResetFilters}
                                 />
                                 <div className="bg-[#0f0f11] border border-white/10 rounded-xl p-4">
                                     <p className="text-xs text-gray-500 text-center mb-3">Advertisement</p>
@@ -174,7 +210,7 @@ export default function ScamDirectory() {
 
                             {view === "table" && <ScamTable items={pageItems} onView={setSelected} />}
 
-                            {/* Quiet Load More */}
+                            {/* Load More */}
                             {page * pageSize < filtered.length && (
                                 <div className="mt-16 text-center">
                                     <button

@@ -5,7 +5,7 @@ import {
     Loader2,
     AlertTriangle,
 } from "lucide-react";
-import Header from "./Header";
+import Header from "../../Header";
 import ReportSuccessModal from "./ReportSuccessModal";
 
 interface ScanPageProps {

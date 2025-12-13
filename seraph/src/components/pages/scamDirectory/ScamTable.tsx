@@ -1,17 +1,21 @@
-
+// src/components/scamDirectory/ScamTable.tsx
 interface ScamItem {
     id: number;
     name: string;
     title: string;
+    summary: string;
     category: string;
+    tags: string[];
     reports: number;
     firstSeen: string;
     screenshot: string;
-    tags: string[];
+    communitySafe: number;
+    explanation: string;
+    logoUrl: string;
 }
 
 interface ScamTableProps {
-    items: Array<ScamItem>;
+    items: ScamItem[];
     onView: (item: ScamItem) => void;
 }
 
@@ -31,7 +35,6 @@ export const ScamTable = ({ items, onView }: ScamTableProps) => {
                     <tr>
                         <th className="p-4 text-sm font-medium text-gray-400">Project</th>
                         <th className="p-4 text-sm font-medium text-gray-400">Category</th>
-                        <th className="p-4 text-sm font-medium text-gray-400">Risk</th>
                         <th className="p-4 text-sm font-medium text-gray-400">Reports</th>
                         <th className="p-4 text-sm font-medium text-gray-400">First Seen</th>
                         <th className="p-4 text-sm font-medium text-gray-400 text-right">Action</th>
@@ -58,9 +61,6 @@ export const ScamTable = ({ items, onView }: ScamTableProps) => {
                                 </div>
                             </td>
                             <td className="p-4 text-sm text-gray-300">{item.category}</td>
-                            <td className="p-4">
-                                
-                            </td>
                             <td className="p-4 text-sm text-gray-300">{item.reports}</td>
                             <td className="p-4 text-sm text-gray-300">
                                 {new Date(item.firstSeen).toLocaleDateString("en-US", {

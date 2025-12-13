@@ -1,11 +1,11 @@
 // import React from 'react'
 import Header from '../../Header'
 import Hero from './Hero'
-import Footer from '../../Footer'
+// import Footer from '../../Footer'
 // import TrustBadges from './TrustBadges'
-import TrendingScams from '../../TrendingScams'
-import CTA from '../../CTA'
-import HowItWorks from '../../HowItWorks'
+import TrendingScams from './TrendingScams'
+import CTA from './CTA'
+import HowItWorks from './HowItWorks'
 import '../../../index.css'
 import AdBanner from '../../ads/AdBanner'
 
@@ -30,7 +30,7 @@ const HomePage = () => {
       </div>
 
       <CTA />
-      <Footer />
+      {/* <Footer /> */}
     </div>
   )
 }

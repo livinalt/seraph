@@ -2,20 +2,23 @@
 import { AlertTriangle, Search } from "lucide-react";
 import { useState } from "react";
 import { useReportModal } from "../hooks/useReportModal";
-import { Link, useLocation } from "react-router-dom"; // if using React Router
+import { Link, useLocation } from "react-router-dom";
 import "../index.css";
 
 const Header = () => {
     const { openReportModal } = useReportModal();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const location = useLocation(); // optional: to highlight current page
+    const location = useLocation();
+
+    // Helper to determine active link
+    const isActive = (path: string) => location.pathname === path;
 
     return (
         <header className="fixed top-0 left-0 w-full z-50 bg-[#0d1117]/90 backdrop-blur-md border-b border-white/10">
-            <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+            <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-5">
 
-                {/* Logo — Perfect Brand Colors */}
-                <a href="/" className="flex items-center gap-3 group">
+                {/* Logo — unchanged, perfect as is */}
+                <Link to="/" className="flex items-center gap-3 group">
                     <div className="relative w-10 h-10">
                         <svg viewBox="0 0 40 40" className="w-full h-full drop-shadow-lg">
                             {/* Outer rings — subtle yellow/orange */}
@@ -45,26 +48,45 @@ const Header = () => {
                     </div>
 
                     <span className="text-xl font-bold text-white hidden sm:block">Seraph</span>
-                </a>
+                </Link>
 
                 {/* Desktop Nav */}
                 <nav className="hidden lg:flex items-center gap-10">
-                    <a href="/" className="text-gray-300 hover:text-yellow-300 transition font-medium">Home</a>
-                    <a href="/scamDirectory" className="text-gray-300 hover:text-yellow-300 transition font-medium">Scam List</a>
-                    <a href="/#blog" className="text-gray-300 hover:text-yellow-300 transition font-medium">Blog</a>
+                    <Link
+                        to="/"
+                        className={`font-medium transition ${isActive("/") ? "text-yellow-300" : "text-gray-300 hover:text-yellow-300"
+                            }`}
+                    >
+                        Home
+                    </Link>
+                    <Link
+                        to="/directory"
+                        className={`font-medium transition ${isActive("/scamDirectory") ? "text-yellow-300" : "text-gray-300 hover:text-yellow-300"
+                            }`}
+                    >
+                        Scam List
+                    </Link>
+                    <Link
+                        to="/"
+                        className="text-gray-300 hover:text-yellow-300 transition font-medium"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            document.querySelector("#blog")?.scrollIntoView({ behavior: "smooth" });
+                        }}
+                    >
+                        Blog
+                    </Link>
 
-                    {/* Search Icon + Report Button — Clean & Separate */}
+                    {/* Search Icon + Report Button */}
                     <div className="flex items-center gap-6">
-                        {/* Search Icon → Opens Directory */}
-                        <a
-                            href="/scamDirectory"
+                        <Link
+                            to="/directory"
                             className="text-gray-400 hover:text-yellow-300 transition p-2 rounded-lg hover:bg-white/5"
                             title="Search scams"
                         >
                             <Search size={22} />
-                        </a>
+                        </Link>
 
-                        {/* Report Scam Button — Elegant & Compact */}
                         <button
                             onClick={openReportModal}
                             className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-red-500/25"
@@ -91,9 +113,31 @@ const Header = () => {
             {mobileOpen && (
                 <div className="lg:hidden bg-[#0d1117]/95 backdrop-blur-lg border-t border-white/10">
                     <div className="px-6 py-8 space-y-6 text-center">
-                        <a href="/" className="block text-xl text-gray-300 hover:text-yellow-300 py-3">Home</a>
-                        <a href="/scamDirectory" className="block text-xl text-gray-300 hover:text-yellow-300 py-3">Scam List</a>
-                        <a href="/#blog" className="block text-xl text-gray-300 hover:text-yellow-300 py-3">Blog</a>
+                        <Link
+                            to="/"
+                            className="block text-xl text-gray-300 hover:text-yellow-300 py-3"
+                            onClick={() => setMobileOpen(false)}
+                        >
+                            Home
+                        </Link>
+                        <Link
+                            to="/scamDirectory"
+                            className="block text-xl text-gray-300 hover:text-yellow-300 py-3"
+                            onClick={() => setMobileOpen(false)}
+                        >
+                            Scam List
+                        </Link>
+                        <Link
+                            to="/"
+                            className="block text-xl text-gray-300 hover:text-yellow-300 py-3"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                setMobileOpen(false);
+                                document.querySelector("#blog")?.scrollIntoView({ behavior: "smooth" });
+                            }}
+                        >
+                            Blog
+                        </Link>
 
                         <button
                             onClick={() => {

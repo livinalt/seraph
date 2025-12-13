@@ -1,6 +1,6 @@
 // src/context/ModalContext.tsx
 import { createContext, useState, type ReactNode } from "react";
-import ReportScamModal from "../components/ReportScamModal";
+import ReportScamModal from "../components/pages/home/ReportScamModal";
 
 type ModalContextType = {
   openReportModal: () => void;
