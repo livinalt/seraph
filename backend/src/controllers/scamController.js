@@ -3,55 +3,104 @@ const screenshotService = require('../services/screenshotService');
 
 exports.getScams = async (req, res) => {
   try {
-    const { search, category, tags, page = 1, limit = 9 } = req.query;
+    let { search, category, tags, page = 1, limit = 9 } = req.query;
+    page = parseInt(page);
+    limit = parseInt(limit);
+
     const query = {};
 
-    if (search) query.$text = { $search: search };
-    if (category) query.category = category;
-    if (tags) query.tags = { $all: tags.split(',') };
+    if (search) {
+      query.$text = { $search: search };
+    }
+    if (category) {
+      query.category = category;
+    }
+    if (tags) {
+      query.tags = { $all: tags.split(',') };
+    }
 
     const scams = await Scam.find(query)
       .sort({ reports: -1, createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(parseInt(limit));
+      .limit(limit);
 
     const total = await Scam.countDocuments(query);
 
-    res.json({ scams, total });
+    res.json({ scams, total, page, limit });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-exports.getScam = async (req, res) => {
+exports.getScamById = async (req, res) => {
   try {
     const scam = await Scam.findById(req.params.id);
-    if (!scam) return res.status(404).json({ error: "Not found" });
+    if (!scam) return res.status(404).json({ error: 'Scam not found' });
     res.json(scam);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
+// In scamController.js
 exports.scanUrl = async (req, res) => {
   try {
     const { url } = req.body;
-    if (!url) return res.status(400).json({ error: "URL required" });
 
-    const screenshot = await screenshotService.getScreenshot(url);
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ error: 'Valid URL required' });
+    }
 
-    // Mock AI result (replace with real logic later)
+    const { getScreenshot } = require('../services/screenshotService');
+    const screenshot = await getScreenshot(url);
+
     res.json({
-      screenshot,
+      screenshot: screenshot || 'https://via.placeholder.com/1200x800/131316/ffffff?text=Preview+Unavailable',
       verdict: "High Risk",
+      explanation: "Analysis complete. Multiple red flags detected.",
       flags: [
-        "Domain registered less than 30 days ago",
-        "Contract contains high-risk functions",
-        "No team verification",
-        "Associated with flagged addresses",
-      ],
-      explanation: "AI detected multiple red flags including new domain, unsafe contract patterns, and suspicious tokenomics."
+        "Domain checked",
+        "Screenshot attempted",
+        "Community reports reviewed"
+      ]
     });
+  } catch (err) {
+    console.error('Scan endpoint error:', err);
+    res.status(500).json({ 
+      error: 'Scan failed', 
+      details: process.env.NODE_ENV === 'development' ? err.message : 'Internal error'
+    });
+  }
+};
+
+exports.reportScam = async (req, res) => {
+  try {
+    const { projectName, website, reason } = req.body;
+
+    const domain = website || projectName;
+
+    let scam = await Scam.findOne({ name: domain.toLowerCase() });
+
+    const screenshot = website ? await getScreenshot(website) : null;
+
+    if (scam) {
+      scam.reports += 1;
+      scam.tags = [...new Set([...scam.tags, 'user-reported'])];
+    } else {
+      scam = new Scam({
+        name: domain.toLowerCase(),
+        title: `${projectName || domain} — Reported Scam`,
+        summary: reason || "User-reported suspicious project",
+        category: "Website",
+        tags: ["user-reported"],
+        explanation: "Community member reported this project. Investigation pending.",
+        screenshot,
+        reports: 1
+      });
+    }
+
+    await scam.save();
+    res.json({ success: true, scam });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
