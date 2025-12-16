@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 
 import HomePage from "./components/pages/home/HomePage";
-import ScanPage from "./components/pages/home/ScanPage";
+import ScanContent from "./components/pages/home/ScanPage";
 import ScamDirectory from "./components/pages/scamDirectory/ScamDirectory";
 import ProjectDetails from "./components/pages/scamDirectory/ProjectDetails";
 
@@ -37,10 +37,7 @@ function App() {
         path="/scan"
         element={
           <Layout>
-            <ScanPage
-              query="suspicious-defi.app"
-              // onOpenReport={handleOpenReport}
-            />
+           <ScanContent />
           </Layout>
         }
       />
