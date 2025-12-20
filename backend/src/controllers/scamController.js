@@ -18,7 +18,9 @@ exports.getScams = async (req, res) => {
     }
     if (tags) {
       const tagArray = tags.split(',').map(t => t.trim());
-      query.tags = { $all: tagArray };
+      if (tagArray.length > 0) {
+        query.tags = { $all: tagArray };
+      }
     }
 
     const scams = await Scam.find(query)
@@ -47,13 +49,15 @@ exports.getScamById = async (req, res) => {
 };
 
 /**
- * SMART SCAN: Check DB first → fresh scan if new
+ * SMART SCAN ENDPOINT
+ * - Checks database first (fast path)
+ * - If not found, performs fresh scan and saves result
  */
 exports.scanUrl = async (req, res) => {
   try {
     const { url } = req.body;
 
-    if (!url || typeof url !== 'string' || !url.trim()) {
+    if (!url || typeof url !== 'string' || url.trim() === '') {
       return res.status(400).json({ error: 'Valid URL is required' });
     }
 
@@ -62,37 +66,37 @@ exports.scanUrl = async (req, res) => {
       normalizedUrl = 'https://' + normalizedUrl.replace(/^https?:\/\//i, '');
     }
 
-    // Step 1: Search database first (fast path)
+    // Step 1: Check if already in database
     let scam = await Scam.findOne({ name: normalizedUrl });
 
     if (scam) {
-      console.log(`Existing scam found for ${normalizedUrl}`);
+      console.log(`Found existing scam in DB: ${normalizedUrl}`);
       return res.json({
         fromDatabase: true,
         screenshot: scam.screenshot,
         verdict: scam.verdict || "High Risk",
-        explanation: scam.explanation || "Previously reported by community",
-        flags: scam.flags || ["Known scam", "Multiple reports"],
+        explanation: scam.explanation || "Previously identified as risky",
+        flags: scam.flags || ["Known scam", "Community reported"],
         reports: scam.reports,
         _id: scam._id
       });
     }
 
     // Step 2: New URL — perform fresh scan
-    console.log(`New scan for ${normalizedUrl}`);
+    console.log(`Performing fresh scan for: ${normalizedUrl}`);
     const screenshot = await getScreenshot(url);
 
-    // Mock AI result — replace with real AI later
+    // Mock analysis (replace with real AI later)
     const verdict = "High Risk";
-    const explanation = "AI analysis detected multiple red flags: new domain, suspicious patterns, no verified team.";
+    const explanation = "AI analysis detected multiple red flags: new domain, suspicious patterns, lack of verified information.";
     const flags = [
       "New domain detected",
-      "No verified ownership",
+      "No verified team or ownership",
       "Suspicious content patterns",
       "Screenshot captured"
     ];
 
-    // Save to database for future fast lookup
+    // Save new result to database
     scam = new Scam({
       name: normalizedUrl,
       title: url,
@@ -104,7 +108,7 @@ exports.scanUrl = async (req, res) => {
       explanation,
       flags,
       reports: 0,
-      communitySafe: 15
+      communitySafe: 10
     });
 
     await scam.save();
@@ -120,7 +124,7 @@ exports.scanUrl = async (req, res) => {
     });
 
   } catch (err) {
-    console.error('SCAN ENDPOINT CRASH:', err);
+    console.error('SCAN ENDPOINT ERROR:', err);
     res.status(500).json({ 
       error: 'Scan failed',
       details: process.env.NODE_ENV === 'development' ? err.message : 'Internal error'
@@ -129,14 +133,16 @@ exports.scanUrl = async (req, res) => {
 };
 
 /**
- * REPORT SCAM: Create or update entry
+ * REPORT SCAM ENDPOINT
+ * - Creates or updates existing entry
+ * - Integrates with scan flow
  */
 exports.reportScam = async (req, res) => {
   try {
     const { website, projectName, reason = '', title = '', summary = '', category = 'Website' } = req.body;
 
     if (!website && !projectName) {
-      return res.status(400).json({ error: 'Website or project name required' });
+      return res.status(400).json({ error: 'Website or project name is required' });
     }
 
     const domain = (website || projectName).trim().toLowerCase();
@@ -147,7 +153,6 @@ exports.reportScam = async (req, res) => {
 
     let scam = await Scam.findOne({ name: normalizedDomain });
 
-    // Get fresh screenshot if possible
     let screenshot = null;
     if (website) {
       screenshot = await getScreenshot(website);
@@ -178,11 +183,11 @@ exports.reportScam = async (req, res) => {
     }
 
     await scam.save();
-    console.log(`Report saved: ${scam._id} - Reports: ${scam.reports}`);
+    console.log(`Report saved: ${scam._id} - Total reports: ${scam.reports}`);
 
     res.json({ success: true, scam });
   } catch (err) {
-    console.error('REPORT ENDPOINT CRASH:', err);
+    console.error('REPORT ENDPOINT ERROR:', err);
     res.status(500).json({ 
       error: 'Failed to save report',
       details: process.env.NODE_ENV === 'development' ? err.message : 'Internal error'

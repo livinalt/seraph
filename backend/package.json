@@ -22,7 +22,9 @@
     "helmet": "^8.1.0",
     "mongodb": "^7.0.0",
     "mongoose": "^9.0.1",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "openai": "^6.15.0",
+    "whois-json": "^2.0.4"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
