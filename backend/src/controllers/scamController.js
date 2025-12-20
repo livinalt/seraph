@@ -1,7 +1,22 @@
 // src/controllers/scamController.js
 const Scam = require('../models/scam');
 const { getScreenshot } = require('../services/screenshotService');
-const axios = require('axios');
+const { Alchemy, Network } = require('alchemy-sdk');
+
+const alchemyConfig = {
+  apiKey: process.env.ALCHEMY_API_KEY,
+};
+
+// Supported chains - easy to extend
+const CHAIN_MAP = {
+  eth: Network.ETH_MAINNET,
+  polygon: Network.POLYGON_MAINNET,
+  bsc: Network.BNB_MAINNET,
+  arbitrum: Network.ARB_MAINNET,
+  optimism: Network.OPT_MAINNET,
+  base: Network.BASE_MAINNET,
+  // Add more as needed
+};
 
 exports.getScams = async (req, res) => {
   try {
@@ -50,16 +65,14 @@ exports.getScamById = async (req, res) => {
 };
 
 /**
- * SMART SCAN WITH VIRUSTOTAL INTEGRATION
- * - Database lookup first
- * - Fresh scan + real threat intelligence if new
+ * MULTI-CHAIN SMART SCAN
  */
 exports.scanUrl = async (req, res) => {
   try {
-    const { url } = req.body;
+    const { url, chain = 'eth' } = req.body; // Allow chain override
 
     if (!url || typeof url !== 'string' || url.trim() === '') {
-      return res.status(400).json({ error: 'Valid URL is required' });
+      return res.status(400).json({ error: 'Valid URL or contract address required' });
     }
 
     let normalizedUrl = url.trim().toLowerCase();
@@ -71,89 +84,74 @@ exports.scanUrl = async (req, res) => {
     let scam = await Scam.findOne({ name: normalizedUrl });
 
     if (scam) {
-      console.log(`Existing entry found: ${normalizedUrl}`);
       return res.json({
         fromDatabase: true,
         screenshot: scam.screenshot,
         verdict: scam.verdict || "High Risk",
-        explanation: scam.explanation || "Previously identified as risky",
+        explanation: scam.explanation || "Previously reported",
         flags: scam.flags || ["Known risk"],
         reports: scam.reports,
-        malicious: scam.malicious || 0,
+        chainRisks: scam.chainRisks || [],
         _id: scam._id
       });
     }
 
     // Step 2: Fresh scan
-    console.log(`New scan + VirusTotal analysis: ${normalizedUrl}`);
     const screenshot = await getScreenshot(url);
 
-    // Step 3: VirusTotal Threat Check
-    let vtResult = {
-      malicious: 0,
-      suspicious: 0,
-      harmless: 0,
-      undetected: 0,
-      flags: []
-    };
+    // Step 3: Multi-chain contract analysis
+    let chainRisks = [];
+    let contractType = "None";
+    let tokenName = "Unknown";
 
-    if (process.env.VIRUSTOTAL_API_KEY) {
+    const contractMatch = url.match(/0x[a-fA-F0-9]{40}/i);
+    if (contractMatch && process.env.ALCHEMY_API_KEY) {
+      const contractAddress = contractMatch[0];
+      const selectedNetwork = CHAIN_MAP[chain] || Network.ETH_MAINNET;
+
       try {
-        // Submit URL
-        const submitRes = await axios.post(
-          'https://www.virustotal.com/api/v3/urls',
-          new URLSearchParams({ url: normalizedUrl }),
-          {
-            headers: {
-              'x-apikey': process.env.VIRUSTOTAL_API_KEY,
-              'Content-Type': 'application/x-www-form-urlencoded'
-            }
-          }
-        );
+        const alchemy = new Alchemy({ ...alchemyConfig, network: selectedNetwork });
 
-        const analysisId = submitRes.data.data.id.split('-')[1];
+        // Get token metadata if ERC20
+        const metadata = await alchemy.core.getTokenMetadata(contractAddress);
+        if (metadata.name || metadata.symbol) {
+          contractType = "Token";
+          tokenName = metadata.name || metadata.symbol;
+          chainRisks.push(`Token: ${tokenName}`);
+        }
 
-        // Wait for analysis (VT needs time)
-        await new Promise(resolve => setTimeout(resolve, 8000));
+        // Check ownership (rug risk if single owner)
+        const owners = await alchemy.core.getOwnersForContract(contractAddress);
+        if (owners?.owners?.length === 1) {
+          chainRisks.push("Single owner - high rug risk");
+        } else if (owners?.owners?.length > 1) {
+          chainRisks.push("Multiple owners - lower rug risk");
+        }
 
-        // Get report
-        const reportRes = await axios.get(`https://www.virustotal.com/api/v3/analyses/${analysisId}`, {
-          headers: { 'x-apikey': process.env.VIRUSTOTAL_API_KEY }
-        });
+        // Check for proxy pattern (upgradable = risk)
+        const code = await alchemy.core.getCode(contractAddress);
+        if (code.includes('delegatecall') || code.includes('callcode')) {
+          chainRisks.push("Proxy contract - upgrade risk");
+        }
 
-        const stats = reportRes.data.data.attributes.stats;
-        vtResult = {
-          malicious: stats.malicious || 0,
-          suspicious: stats.suspicious || 0,
-          harmless: stats.harmless || 0,
-          undetected: stats.undetected || 0
-        };
-
-        if (vtResult.malicious > 0) vtResult.flags.push(`${vtResult.malicious} engines detected malware`);
-        if (vtResult.suspicious > 0) vtResult.flags.push(`${vtResult.suspicious} engines flagged suspicious`);
-        if (vtResult.malicious + vtResult.suspicious > 5) vtResult.flags.push("High threat level");
-
-      } catch (vtErr) {
-        console.warn('VirusTotal failed:', vtErr.response?.data || vtErr.message);
-        vtResult.flags.push("Threat check unavailable");
+      } catch (chainErr) {
+        console.warn(`Alchemy analysis failed on ${chain}:`, chainErr.message);
+        chainRisks.push("Blockchain analysis unavailable");
       }
-    } else {
-      console.warn('VIRUSTOTAL_API_KEY not set');
-      vtResult.flags.push("Threat intelligence disabled");
     }
 
     // Step 4: Final verdict
-    const isMalicious = vtResult.malicious > 0 || vtResult.suspicious > 3;
-    const verdict = isMalicious ? "High Risk" : vtResult.malicious + vtResult.suspicious > 0 ? "Medium Risk" : "Low Risk";
-    
-    const explanation = isMalicious
-      ? `VirusTotal detected serious threats: ${vtResult.malicious} malicious and ${vtResult.suspicious} suspicious engines flagged this site.`
-      : `VirusTotal scan: ${vtResult.malicious} malicious, ${vtResult.suspicious} suspicious detections. Exercise caution.`;
+    const hasChainRisk = chainRisks.some(r => r.includes('rug') || r.includes('Proxy'));
+    const verdict = hasChainRisk ? "High Risk" : contractType !== "None" ? "Medium Risk" : "Low Risk";
+
+    const explanation = contractType !== "None"
+      ? `Blockchain analysis: ${contractType} contract "${tokenName}" detected on ${chain.toUpperCase()}. Risks: ${chainRisks.join(', ')}`
+      : "No blockchain contract detected in input";
 
     const flags = [
-      ...vtResult.flags,
-      "Screenshot captured",
-      verdict === "High Risk" ? "Immediate action recommended" : "Monitor closely"
+      contractType !== "None" ? `Contract: ${contractType}` : "No contract",
+      ...chainRisks,
+      "Screenshot captured"
     ];
 
     // Step 5: Save to DB
@@ -161,15 +159,15 @@ exports.scanUrl = async (req, res) => {
       name: normalizedUrl,
       title: url,
       summary: explanation.slice(0, 200),
-      category: "Website",
-      tags: ["vt-scanned", verdict.toLowerCase().replace(' ', '-')],
+      category: contractType !== "None" ? "Token" : "Website",
+      tags: ["multi-chain-scanned", verdict.toLowerCase().replace(' ', '-')],
       screenshot,
       verdict,
       explanation,
       flags,
-      malicious: vtResult.malicious,
+      chainRisks,
       reports: 0,
-      communitySafe: verdict === "Low Risk" ? 80 : verdict === "Medium Risk" ? 40 : 5
+      communitySafe: verdict === "Low Risk" ? 80 : verdict === "Medium Risk" ? 50 : 10
     });
 
     await scam.save();
@@ -180,8 +178,7 @@ exports.scanUrl = async (req, res) => {
       verdict,
       explanation,
       flags,
-      malicious: vtResult.malicious,
-      suspicious: vtResult.suspicious,
+      chainRisks,
       reports: 0,
       _id: scam._id
     });
@@ -196,7 +193,7 @@ exports.scanUrl = async (req, res) => {
 };
 
 /**
- * REPORT SCAM ENDPOINT
+ * REPORT SCAM (unchanged - works with multi-chain)
  */
 exports.reportScam = async (req, res) => {
   try {
