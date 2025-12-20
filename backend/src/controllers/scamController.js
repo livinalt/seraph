@@ -1,6 +1,7 @@
 // src/controllers/scamController.js
 const Scam = require('../models/scam');
 const { getScreenshot } = require('../services/screenshotService');
+const axios = require('axios');
 
 exports.getScams = async (req, res) => {
   try {
@@ -49,9 +50,9 @@ exports.getScamById = async (req, res) => {
 };
 
 /**
- * SMART SCAN ENDPOINT
- * - Checks database first (fast path)
- * - If not found, performs fresh scan and saves result
+ * SMART SCAN WITH VIRUSTOTAL INTEGRATION
+ * - Database lookup first
+ * - Fresh scan + real threat intelligence if new
  */
 exports.scanUrl = async (req, res) => {
   try {
@@ -66,49 +67,109 @@ exports.scanUrl = async (req, res) => {
       normalizedUrl = 'https://' + normalizedUrl.replace(/^https?:\/\//i, '');
     }
 
-    // Step 1: Check if already in database
+    // Step 1: Check database first
     let scam = await Scam.findOne({ name: normalizedUrl });
 
     if (scam) {
-      console.log(`Found existing scam in DB: ${normalizedUrl}`);
+      console.log(`Existing entry found: ${normalizedUrl}`);
       return res.json({
         fromDatabase: true,
         screenshot: scam.screenshot,
         verdict: scam.verdict || "High Risk",
         explanation: scam.explanation || "Previously identified as risky",
-        flags: scam.flags || ["Known scam", "Community reported"],
+        flags: scam.flags || ["Known risk"],
         reports: scam.reports,
+        malicious: scam.malicious || 0,
         _id: scam._id
       });
     }
 
-    // Step 2: New URL — perform fresh scan
-    console.log(`Performing fresh scan for: ${normalizedUrl}`);
+    // Step 2: Fresh scan
+    console.log(`New scan + VirusTotal analysis: ${normalizedUrl}`);
     const screenshot = await getScreenshot(url);
 
-    // Mock analysis (replace with real AI later)
-    const verdict = "High Risk";
-    const explanation = "AI analysis detected multiple red flags: new domain, suspicious patterns, lack of verified information.";
+    // Step 3: VirusTotal Threat Check
+    let vtResult = {
+      malicious: 0,
+      suspicious: 0,
+      harmless: 0,
+      undetected: 0,
+      flags: []
+    };
+
+    if (process.env.VIRUSTOTAL_API_KEY) {
+      try {
+        // Submit URL
+        const submitRes = await axios.post(
+          'https://www.virustotal.com/api/v3/urls',
+          new URLSearchParams({ url: normalizedUrl }),
+          {
+            headers: {
+              'x-apikey': process.env.VIRUSTOTAL_API_KEY,
+              'Content-Type': 'application/x-www-form-urlencoded'
+            }
+          }
+        );
+
+        const analysisId = submitRes.data.data.id.split('-')[1];
+
+        // Wait for analysis (VT needs time)
+        await new Promise(resolve => setTimeout(resolve, 8000));
+
+        // Get report
+        const reportRes = await axios.get(`https://www.virustotal.com/api/v3/analyses/${analysisId}`, {
+          headers: { 'x-apikey': process.env.VIRUSTOTAL_API_KEY }
+        });
+
+        const stats = reportRes.data.data.attributes.stats;
+        vtResult = {
+          malicious: stats.malicious || 0,
+          suspicious: stats.suspicious || 0,
+          harmless: stats.harmless || 0,
+          undetected: stats.undetected || 0
+        };
+
+        if (vtResult.malicious > 0) vtResult.flags.push(`${vtResult.malicious} engines detected malware`);
+        if (vtResult.suspicious > 0) vtResult.flags.push(`${vtResult.suspicious} engines flagged suspicious`);
+        if (vtResult.malicious + vtResult.suspicious > 5) vtResult.flags.push("High threat level");
+
+      } catch (vtErr) {
+        console.warn('VirusTotal failed:', vtErr.response?.data || vtErr.message);
+        vtResult.flags.push("Threat check unavailable");
+      }
+    } else {
+      console.warn('VIRUSTOTAL_API_KEY not set');
+      vtResult.flags.push("Threat intelligence disabled");
+    }
+
+    // Step 4: Final verdict
+    const isMalicious = vtResult.malicious > 0 || vtResult.suspicious > 3;
+    const verdict = isMalicious ? "High Risk" : vtResult.malicious + vtResult.suspicious > 0 ? "Medium Risk" : "Low Risk";
+    
+    const explanation = isMalicious
+      ? `VirusTotal detected serious threats: ${vtResult.malicious} malicious and ${vtResult.suspicious} suspicious engines flagged this site.`
+      : `VirusTotal scan: ${vtResult.malicious} malicious, ${vtResult.suspicious} suspicious detections. Exercise caution.`;
+
     const flags = [
-      "New domain detected",
-      "No verified team or ownership",
-      "Suspicious content patterns",
-      "Screenshot captured"
+      ...vtResult.flags,
+      "Screenshot captured",
+      verdict === "High Risk" ? "Immediate action recommended" : "Monitor closely"
     ];
 
-    // Save new result to database
+    // Step 5: Save to DB
     scam = new Scam({
       name: normalizedUrl,
       title: url,
-      summary: "Automatically scanned project",
+      summary: explanation.slice(0, 200),
       category: "Website",
-      tags: ["auto-scanned", "high-risk"],
+      tags: ["vt-scanned", verdict.toLowerCase().replace(' ', '-')],
       screenshot,
       verdict,
       explanation,
       flags,
+      malicious: vtResult.malicious,
       reports: 0,
-      communitySafe: 10
+      communitySafe: verdict === "Low Risk" ? 80 : verdict === "Medium Risk" ? 40 : 5
     });
 
     await scam.save();
@@ -119,12 +180,14 @@ exports.scanUrl = async (req, res) => {
       verdict,
       explanation,
       flags,
+      malicious: vtResult.malicious,
+      suspicious: vtResult.suspicious,
       reports: 0,
       _id: scam._id
     });
 
   } catch (err) {
-    console.error('SCAN ENDPOINT ERROR:', err);
+    console.error('SCAN ENDPOINT CRASH:', err);
     res.status(500).json({ 
       error: 'Scan failed',
       details: process.env.NODE_ENV === 'development' ? err.message : 'Internal error'
@@ -134,8 +197,6 @@ exports.scanUrl = async (req, res) => {
 
 /**
  * REPORT SCAM ENDPOINT
- * - Creates or updates existing entry
- * - Integrates with scan flow
  */
 exports.reportScam = async (req, res) => {
   try {
@@ -159,16 +220,14 @@ exports.reportScam = async (req, res) => {
     }
 
     if (scam) {
-      // Update existing
       scam.reports += 1;
       scam.tags = [...new Set([...(scam.tags || []), 'user-reported'])];
       if (reason) {
         scam.summary = (scam.summary || '') + ` | User reason: ${reason}`;
       }
       if (screenshot) scam.screenshot = screenshot;
-      scam.communitySafe = Math.max(0, (scam.communitySafe || 50) - 10); // Lower safety score
+      scam.communitySafe = Math.max(0, (scam.communitySafe || 50) - 10);
     } else {
-      // Create new
       scam = new Scam({
         name: normalizedDomain,
         title: title || projectName || website,
@@ -183,7 +242,7 @@ exports.reportScam = async (req, res) => {
     }
 
     await scam.save();
-    console.log(`Report saved: ${scam._id} - Total reports: ${scam.reports}`);
+    console.log(`Report saved: ${scam._id} - Reports: ${scam.reports}`);
 
     res.json({ success: true, scam });
   } catch (err) {
