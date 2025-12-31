@@ -16,14 +16,17 @@
   "dependencies": {
     "alchemy-sdk": "^3.6.5",
     "axios": "^1.13.2",
+    "coingecko-api": "^1.0.10",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
+    "ethers": "^6.16.0",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
     "mongodb": "^7.0.0",
     "mongoose": "^9.0.1",
     "multer": "^2.0.2",
+    "node-fetch": "^3.3.2",
     "openai": "^6.15.0",
     "whois-json": "^2.0.4"
   },

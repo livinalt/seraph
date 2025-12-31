@@ -1,6 +1,9 @@
 // src/controllers/reportController.js
 const Scam = require('../models/scam');
 const { getScreenshot } = require('../services/screenshotService');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 exports.reportScam = async (req, res) => {
   try {
