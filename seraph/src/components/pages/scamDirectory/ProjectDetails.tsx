@@ -4,7 +4,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   ShieldAlert,
   ArrowLeft,
-  Share2,
   Globe,
   FileCode,
   Coins,
@@ -12,6 +11,7 @@ import {
   XCircle,
 } from "lucide-react";
 import Header from "../../Header";
+import ShareButton from "../home/ShareButton";
 
 interface ScamDetails {
   _id: string;
@@ -38,7 +38,9 @@ const ProjectDetails = () => {
       if (!id) return;
 
       try {
-        const res = await fetch(`https://seraph-1.onrender.com/api/scams/${id}`);
+        const res = await fetch(
+          `https://seraph-1.onrender.com/api/scams/${id}`
+        );
         if (!res.ok) throw new Error("Scam not found");
         const data = await res.json();
         setScam(data);
@@ -155,25 +157,35 @@ const ProjectDetails = () => {
           )}
 
           {/* Verdict */}
-          <div className={`p-10 rounded-2xl text-center mb-12 border ${getVerdictColor()}`}>
+          <div
+            className={`p-10 rounded-2xl text-center mb-12 border ${getVerdictColor()}`}
+          >
             <ShieldAlert className="w-20 h-20 mx-auto mb-6 text-current opacity-80" />
-            <h2 className="text-5xl font-bold mb-4">{scam.verdict || "High Risk"}</h2>
+            <h2 className="text-5xl font-bold mb-4">
+              {scam.verdict || "High Risk"}
+            </h2>
             <p className="text-xl max-w-3xl mx-auto leading-relaxed">
-              {scam.explanation || "Multiple scam indicators detected. Exercise extreme caution."}
+              {scam.explanation ||
+                "Multiple scam indicators detected. Exercise extreme caution."}
             </p>
           </div>
 
           {/* Key Risk Indicators */}
           {scam.flags && scam.flags.length > 0 && (
             <div className="mb-12">
-              <h3 className="text-2xl font-semibold mb-6">Key Risk Indicators</h3>
+              <h3 className="text-2xl font-semibold mb-6">
+                Key Risk Indicators
+              </h3>
               <div className="grid md:grid-cols-2 gap-4">
                 {scam.flags.map((flag, i) => (
                   <div
                     key={i}
                     className="bg-red-900/20 border border-red-500/40 rounded-xl p-5 flex items-start gap-4"
                   >
-                    <XCircle className="text-red-400 mt-1 flex-shrink-0" size={24} />
+                    <XCircle
+                      className="text-red-400 mt-1 flex-shrink-0"
+                      size={24}
+                    />
                     <span className="text-lg">{flag}</span>
                   </div>
                 ))}
@@ -185,7 +197,9 @@ const ProjectDetails = () => {
           <div className="bg-[#131316] border border-gray-800 rounded-2xl p-8 mb-12">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm uppercase tracking-wider">Community Reports</p>
+                <p className="text-gray-400 text-sm uppercase tracking-wider">
+                  Community Reports
+                </p>
                 <p className="text-4xl font-bold mt-2">{scam.reports || 0}</p>
               </div>
               <div className="text-right">
@@ -198,10 +212,12 @@ const ProjectDetails = () => {
 
           {/* Actions */}
           <div className="flex justify-center gap-6">
-            <button className="flex items-center gap-3 px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl transition">
-              <Share2 size={20} />
-              Share Report
-            </button>
+
+            <ShareButton
+              title={scam.title}
+              url={window.location.href}
+              size="lg"
+            />
             <button
               onClick={() => navigate(-1)}
               className="flex items-center gap-3 px-6 py-3 bg-yellow-400 text-black font-bold rounded-xl hover:bg-yellow-300 transition"
