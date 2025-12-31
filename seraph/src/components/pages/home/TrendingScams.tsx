@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ScamCard from "../../pages/home/ScamCard";
-import { type ScamItem } from "../../../types/ScamItem"; 
+import { type ScamItem } from "../../../types/ScamItem";
+import { Link } from "react-router-dom";
 
 const TrendingScams = () => {
   const [scams, setScams] = useState<ScamItem[]>([]);
@@ -9,7 +10,9 @@ const TrendingScams = () => {
   useEffect(() => {
     const fetchTrending = async () => {
       try {
-        const res = await fetch('https://seraph-1.onrender.com/api/scams?limit=8&sort=reports');
+        const res = await fetch(
+          "https://seraph-1.onrender.com/api/scams?limit=8&sort=reports"
+        );
         const data = await res.json();
         setScams(data.scams || []);
       } catch (err) {
@@ -43,7 +46,9 @@ const TrendingScams = () => {
         </h2>
 
         {scams.length === 0 ? (
-          <p className="text-gray-400 text-center py-12">No reports yet. Be the first to report a scam!</p>
+          <p className="text-gray-400 text-center py-12">
+            No reports yet. Be the first to report a scam!
+          </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 auto-rows-fr">
             {scams.map((scam) => (
@@ -65,12 +70,12 @@ const TrendingScams = () => {
         )}
 
         <div className="text-center mt-16">
-          <a
-            href="/directory"
-            className="text-yellow-400 text-lg font-medium hover:underline transition"
+          <Link
+            to="/directory"
+            className="text-yellow-400 text-lg font-medium hover:underline transition inline-block"
           >
             View all reports →
-          </a>
+          </Link>
         </div>
       </div>
     </section>
