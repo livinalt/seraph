@@ -9,7 +9,7 @@ const TrendingScams = () => {
   useEffect(() => {
     const fetchTrending = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/scams?limit=8&sort=reports');
+        const res = await fetch('https://seraph-1.onrender.com/api/scams?limit=8&sort=reports');
         const data = await res.json();
         setScams(data.scams || []);
       } catch (err) {
