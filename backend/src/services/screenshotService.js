@@ -1,24 +1,12 @@
 // src/services/screenshotService.js
 const axios = require('axios');
-const dotenv = require('dotenv');
-dotenv.config();
 
 const APIFLASH_KEY = process.env.APIFLASH_KEY?.trim();
 
-
-const PLACEHOLDER = 'https://placehold.co/800x600/1a1a1c/ffffff?text=No+Preview+Available&font=roboto';
-
-if (!APIFLASH_KEY) {
-  console.warn('⚠️  APIFLASH_KEY not set in .env — using placeholder images');
-}
+const PLACEHOLDER = 'https://placehold.co/800x600/1a1a1c/ffffff?text=Preview+Blocked+or+Timeout&font=roboto';
 
 const getScreenshot = async (url) => {
-  if (!url?.trim()) {
-    console.warn('No URL provided to getScreenshot');
-    return PLACEHOLDER;
-  }
-
-  if (!APIFLASH_KEY) {
+  if (!url?.trim() || !APIFLASH_KEY) {
     return PLACEHOLDER;
   }
 
@@ -38,27 +26,25 @@ const getScreenshot = async (url) => {
         thumbnail_width: 800,
         no_ads: true,
         no_cookie_banners: true,
-        delay: 3,
-        response_type: 'json' // Important: get JSON with image URL
+        delay: 5, // Increased delay for slow sites
+        response_type: 'json'
       },
-      timeout: 20000
+      timeout: 30000 // 30 seconds (was 20k = 20 seconds)
     });
 
-    // ApiFlash returns { url: "https://s3.amazonaws.com/...jpg" }
     if (response.data && response.data.url) {
-      console.log('✅ Screenshot captured:', response.data.url);
       return response.data.url;
-    } else {
-      console.warn('ApiFlash returned no image URL:', response.data);
-      return PLACEHOLDER;
     }
+
+    console.warn('ApiFlash returned no image:', response.data);
+    return PLACEHOLDER;
   } catch (err) {
-    if (err.response) {
-      console.error(`ApiFlash error ${err.response.status}:`, err.response.data);
-    } else if (err.code === 'ECONNABORTED') {
-      console.error('ApiFlash timeout');
+    if (err.code === 'ECONNABORTED') {
+      console.warn('ApiFlash timeout for:', formattedUrl);
+    } else if (err.response) {
+      console.warn(`ApiFlash error ${err.response.status}:`, err.response.data);
     } else {
-      console.error('ApiFlash request failed:', err.message);
+      console.warn('ApiFlash failed:', err.message);
     }
     return PLACEHOLDER;
   }
