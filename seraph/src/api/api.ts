@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://seraph-1.onrender.com/api';
 
 export const fetchScams = async (params = {}) => {
   const query = new URLSearchParams(params).toString();

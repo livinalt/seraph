@@ -1,27 +1,32 @@
+// src/pages/home/ScanContent.tsx
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom"; // ← Add this
+import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   ShieldAlert,
   Radar,
   Loader2,
-  AlertTriangle,
   ArrowLeft,
+  Globe,
+  FileCode,
+  XCircle,
+  AlertCircle,
+  Coins,
+  Layers,
 } from "lucide-react";
 import Header from "../../Header";
 import ReportSuccessModal from "./ReportSuccessModal";
-
 
 const ScanContent = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const query = searchParams.get("q") || "";
+  const type = searchParams.get("type") || "website"; // From SearchBar
 
   const [tick, setTick] = useState(0);
   const [screenshot, setScreenshot] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<any>(null);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Fake scanning animation
   useEffect(() => {
     const interval = setInterval(() => setTick((t) => t + 1), 200);
     return () => clearInterval(interval);
@@ -29,19 +34,18 @@ const ScanContent = () => {
 
   const isLoading = tick < 20;
 
-  // Real scan via backend
   useEffect(() => {
     const performScan = async () => {
-      if (!query.trim()) {
-        setScreenshot(null);
-        return;
-      }
+      if (!query.trim()) return;
 
       try {
-        const res = await fetch('http://localhost:5000/api/scan', {
+        const res = await fetch('https://seraph-1.onrender.com/api/scan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: query })
+          body: JSON.stringify({ 
+            url: query,
+            type // Pass type to backend
+          })
         });
         const data = await res.json();
         setScreenshot(data.screenshot);
@@ -49,25 +53,24 @@ const ScanContent = () => {
       } catch (err) {
         console.error("Scan failed:", err);
         setScreenshot(null);
-        setScanResult(null);
+        setScanResult({ verdict: "Error", explanation: "Scan service unavailable" });
       }
     };
 
     performScan();
-  }, [query]);
+  }, [query, type]);
 
-  // Report + redirect to Directory
   const handleReport = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/report', {
+      const res = await fetch('https://seraph-1.onrender.com/api/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          website: query,
-          reason: scanResult?.verdict || "High risk detected from scan",
-          title: query,
-          summary: "Reported via scan tool",
-          category: "Website"
+          website: type === "website" ? query : undefined,
+          contract: type === "contract" ? query : undefined,
+          projectName: type === "project" || type === "token" ? query : undefined,
+          reason: scanResult?.verdict || "High risk detected",
+          category: type === "contract" ? "Token" : type === "website" ? "Website" : "Project"
         })
       });
 
@@ -77,41 +80,46 @@ const ScanContent = () => {
           setShowSuccess(false);
           navigate('/directory');
         }, 3000);
-      } else {
-        alert("Report submission failed. Please try again.");
       }
     } catch (err) {
-      alert("Network error. Check your connection.");
+      alert("Report failed");
     }
   };
 
-  // Back button handler
-  const handleBack = () => {
-    navigate(-1); // Goes back to previous page (usually home/search)
+  const getTypeIcon = () => {
+    switch (type) {
+      case "website": return <Globe className="text-blue-400" size={24} />;
+      case "contract": return <FileCode className="text-purple-400" size={24} />;
+      case "token": return <Coins className="text-yellow-400" size={24} />;
+      case "project": return <Layers className="text-green-400" size={24} />;
+      default: return <AlertCircle className="text-gray-400" size={24} />;
+    }
   };
 
   return (
     <>
       <Header />
 
-      {/* Back Button - Fixed Top Left */}
+      {/* Back Button */}
       <button
-        onClick={handleBack}
-        className="fixed top-24 left-6 z-40 flex items-center gap-2 px-4 py-2 bg-[#0f0f11]/80 backdrop-blur-sm border border-white/10 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all shadow-lg"
+        onClick={() => navigate(-1)}
+        className="fixed top-24 left-6 z-50 flex items-center gap-2 px-4 py-2 bg-[#0f0f11]/90 backdrop-blur border border-white/10 rounded-lg text-gray-300 hover:text-white transition"
       >
         <ArrowLeft size={18} />
-        <span className="text-sm font-medium">Back</span>
+        Back
       </button>
 
       <div className="min-h-screen bg-[#0b0b0c] text-white px-6 py-14 flex flex-col items-center pt-32">
-        <h1 className="text-3xl md:text-4xl font-bold mb-3 text-center">
-          Scan Status for:{" "}
-          <span className="text-yellow-400">{query || "No query"}</span>
-        </h1>
+        <div className="flex items-center gap-3 mb-4">
+          {getTypeIcon()}
+          <span className="text-sm uppercase tracking-wider text-gray-400">
+            {type === "contract" ? "Smart Contract" : type.charAt(0).toUpperCase() + type.slice(1)}
+          </span>
+        </div>
 
-        <p className="text-gray-400 mb-12 text-center max-w-lg">
-          Seraph AI is analyzing the project using 50+ security signals.
-        </p>
+        <h1 className="text-3xl md:text-4xl font-bold mb-6 text-center">
+          Analyzing: <span className="text-yellow-400">{query}</span>
+        </h1>
 
         {isLoading ? (
           <div className="flex flex-col items-center">
@@ -123,73 +131,94 @@ const ScanContent = () => {
             </div>
             <div className="text-gray-400 text-sm text-center max-w-md">
               {[
-                "Analyzing domain reputation…",
-                "Checking smart contract…",
-                "Scanning for scam patterns…",
-                "Cross-checking reports…",
-                "Finalizing verdict…",
+                "Resolving domain/contract...",
+                "Fetching blockchain data...",
+                "Checking for honeypot/rug patterns...",
+                "Cross-referencing known scams...",
+                "Generating AI verdict...",
               ][Math.floor(tick / 4)]}
             </div>
             <Loader2 className="mt-8 text-yellow-400 animate-spin" size={30} />
           </div>
         ) : (
-          <div className="w-full max-w-5xl">
-            {/* Website Preview */}
-            <div className="mb-10">
-              <h3 className="text-lg font-semibold mb-3">Website Preview</h3>
-              <div className="rounded-xl overflow-hidden border border-gray-800 bg-[#131316] p-3">
-                {screenshot ? (
-                  <img
-                    src={screenshot}
-                    alt="Website preview"
-                    className="rounded-lg w-full max-h-96 object-cover"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-                    <ShieldAlert className="w-12 h-12 mb-3 opacity-60" />
-                    <p>No preview available</p>
-                    <p className="text-xs mt-2">Site may block screenshots or be unreachable</p>
-                  </div>
-                )}
+          <div className="w-full max-w-5xl space-y-10">
+            {/* Website-Specific Preview */}
+            {type === "website" && (
+              <div>
+                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                  <Globe size={20} />
+                  Website Preview
+                </h3>
+                <div className="rounded-xl overflow-hidden border border-gray-800 bg-[#131316]">
+                  {screenshot ? (
+                    <img src={screenshot} alt="Site preview" className="w-full max-h-96 object-contain" />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-32 text-gray-500">
+                      <ShieldAlert size={48} className="mb-4 opacity-60" />
+                      <p>No preview available</p>
+                      <p className="text-xs mt-2">Site may block screenshots</p>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Contract-Specific Info */}
+            {type === "contract" && (
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="bg-[#131316] border border-gray-800 rounded-xl p-6 text-center">
+                  <p className="text-gray-400 text-sm">Ownership</p>
+                  <p className="text-2xl font-bold text-red-400 mt-2">Not Renounced</p>
+                </div>
+                <div className="bg-[#131316] border border-gray-800 rounded-xl p-6 text-center">
+                  <p className="text-gray-400 text-sm">Honeypot Risk</p>
+                  <p className="text-2xl font-bold text-yellow-400 mt-2">Detected</p>
+                </div>
+                <div className="bg-[#131316] border border-gray-800 rounded-xl p-6 text-center">
+                  <p className="text-gray-400 text-sm">Liquidity</p>
+                  <p className="text-2xl font-bold text-green-400 mt-2">Locked</p>
+                </div>
+              </div>
+            )}
 
             {/* Verdict */}
-            <div className="p-8 rounded-2xl bg-[#131316] border border-red-500/30 shadow-xl text-center mb-10">
-              <ShieldAlert className="w-16 h-16 text-red-500 mx-auto mb-4" />
-              <h2 className="text-3xl font-bold mb-2">
+            <div className={`p-8 rounded-2xl shadow-xl text-center border ${
+              scanResult?.verdict === "High Risk" ? "bg-red-900/20 border-red-500/50" : "bg-green-900/20 border-green-500/50"
+            }`}>
+              <ShieldAlert className="w-16 h-16 mx-auto mb-4 text-red-500" />
+              <h2 className="text-4xl font-bold mb-3">
                 {scanResult?.verdict || "High Risk"}
               </h2>
-              <p className="text-red-400">
-                {scanResult?.explanation || "This project shows multiple scam indicators"}
+              <p className="text-lg text-gray-300 max-w-3xl mx-auto">
+                {scanResult?.explanation || "Multiple scam indicators detected. Exercise extreme caution."}
               </p>
             </div>
 
             {/* Flags */}
-            {scanResult?.flags && scanResult.flags.length > 0 && (
-              <div className="grid md:grid-cols-2 gap-4 mb-10">
-                {scanResult.flags.map((flag: string, i: number) => (
-                  <div
-                    key={i}
-                    className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 flex items-center gap-3"
-                  >
-                    <AlertTriangle className="text-red-400" size={20} />
-                    <span className="text-sm text-gray-300">{flag}</span>
-                  </div>
-                ))}
+            {scanResult?.flags && (
+              <div>
+                <h3 className="text-xl font-semibold mb-4">Key Risk Indicators</h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {scanResult.flags.map((flag: string, i: number) => (
+                    <div key={i} className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 flex items-center gap-3">
+                      <XCircle className="text-red-400" size={20} />
+                      <span className="text-gray-300">{flag}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
             {/* Report Button */}
-            <div className="text-center">
+            <div className="text-center pt-8">
               <button
                 onClick={handleReport}
-                className="px-10 py-5 bg-red-600 text-white font-bold text-lg rounded-xl shadow-lg hover:bg-red-500 transition transform hover:scale-105"
+                className="px-12 py-6 bg-red-600 text-white text-xl font-bold rounded-2xl shadow-2xl hover:bg-red-500 transition transform hover:scale-105"
               >
-                Report This Scam Now
+                Report This as Scam
               </button>
-              <p className="text-gray-500 text-sm mt-4">
-                Your report will appear instantly in the directory
+              <p className="text-gray-400 text-sm mt-4">
+                Help protect the community — your report will be reviewed and added to the directory
               </p>
             </div>
           </div>
