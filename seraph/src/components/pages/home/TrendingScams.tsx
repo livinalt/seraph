@@ -28,9 +28,19 @@ const TrendingScams = () => {
 
   if (loading) {
     return (
-      <section className="w-full py-24 bg-[#02040A] relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-white text-xl">Loading latest reports...</p>
+      <section className="w-full py-24 bg-[#02040A]">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-12">
+            Latest Reports
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className="bg-gray-800/50 border border-gray-800 rounded-xl h-96 animate-pulse"
+              />
+            ))}
+          </div>
         </div>
       </section>
     );
@@ -72,9 +82,10 @@ const TrendingScams = () => {
         <div className="text-center mt-16">
           <Link
             to="/directory"
-            className="text-yellow-400 text-lg font-medium hover:underline transition inline-block"
+            className="inline-flex items-center gap-2 text-yellow-400 text-lg font-medium hover:gap-4 transition-all duration-300"
           >
-            View all reports →
+            View all reports
+            <span className="text-2xl">→</span>
           </Link>
         </div>
       </div>
