@@ -179,6 +179,7 @@ export default function ScamDirectory() {
                   {pageItems.map((item) => (
                     <div key={item._id} className="h-full">
                       <ScamCard
+                        _id={item._id}
                         title={item.title}
                         entityType={item.category}
                         summary={item.summary}

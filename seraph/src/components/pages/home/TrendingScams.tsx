@@ -49,6 +49,7 @@ const TrendingScams = () => {
             {scams.map((scam) => (
               <ScamCard
                 key={scam._id}
+                _id={scam._id}
                 title={scam.title}
                 entityType={scam.category}
                 summary={scam.summary}
