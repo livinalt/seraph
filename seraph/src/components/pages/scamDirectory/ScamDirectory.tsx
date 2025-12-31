@@ -9,6 +9,7 @@ import { ScamDetailModal } from "../scamDirectory/ScamDetailModal";
 import Header from "../../Header";
 import { fetchScams } from "../../../api/api"; 
 import { type ScamItem } from "../../../types/ScamItem"; 
+import { useReportModal } from "../../../hooks/useReportModal";
 
 
 interface Filters {
@@ -20,6 +21,7 @@ export default function ScamDirectory() {
   const [scams, setScams] = useState<ScamItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const { openReportModal } = useReportModal();
 
   const categories = useMemo(() => {
     const cats = new Set(scams.map((s) => s.category));
@@ -227,7 +229,9 @@ export default function ScamDirectory() {
           <div className="text-center mt-24 py-16 border-t border-gray-800">
             <p className="text-lg text-gray-400">
               Found a scam not listed?{" "}
-              <button className="text-yellow-400 font-bold text-xl hover:underline">
+              <button className="text-yellow-400 font-bold text-xl hover:underline"
+              onClick={openReportModal}
+              >
                 Report It Now
               </button>
             </p>
