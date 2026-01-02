@@ -26,41 +26,51 @@ const TrendingScams = () => {
     fetchTrending();
   }, []);
 
-  if (loading) {
-    return (
-      <section className="w-full py-24 bg-[#02040A]">
-        <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-12">
-            Latest Reports
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+  return (
+    <section className="w-full py-24 bg-[#f7f8fa]">
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Header */}
+        <div className="flex items-end justify-between mb-10">
+          <div>
+            <p className="text-sm font-medium text-gray-500 mb-2">
+              Community intelligence
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-semibold text-gray-900">
+              Latest reports
+            </h2>
+          </div>
+
+          <Link
+            to="/directory"
+            className="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-700 transition"
+          >
+            View all
+            <span>→</span>
+          </Link>
+        </div>
+
+        {/* Loading */}
+        {loading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
               <div
                 key={i}
-                className="bg-gray-800/50 border border-gray-800 rounded-xl h-96 animate-pulse"
+                className="h-80 rounded-2xl bg-white border border-gray-200 shadow-sm animate-pulse"
               />
             ))}
           </div>
-        </div>
-      </section>
-    );
-  }
+        )}
 
-  return (
-    <section className="w-full py-24 bg-[#02040A] relative overflow-hidden">
-      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10 pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 relative z-10">
-        <h2 className="text-3xl sm:text-4xl font-bold text-white text-left mb-12">
-          Latest Reports
-        </h2>
-
-        {scams.length === 0 ? (
-          <p className="text-gray-400 text-center py-12">
-            No reports yet. Be the first to report a scam!
+        {/* Empty */}
+        {!loading && scams.length === 0 && (
+          <p className="text-gray-500 text-center py-16">
+            No reports yet. Be the first to report a scam.
           </p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 auto-rows-fr">
+        )}
+
+        {/* Grid */}
+        {!loading && scams.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
             {scams.map((scam) => (
               <ScamCard
                 key={scam._id}
@@ -79,13 +89,14 @@ const TrendingScams = () => {
           </div>
         )}
 
-        <div className="text-center mt-16">
+        {/* Mobile CTA */}
+        <div className="text-center mt-12 sm:hidden">
           <Link
             to="/directory"
-            className="inline-flex items-center gap-2 text-yellow-400 text-lg font-medium hover:gap-4 transition-all duration-300"
+            className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-700"
           >
             View all reports
-            <span className="text-2xl">→</span>
+            <span>→</span>
           </Link>
         </div>
       </div>

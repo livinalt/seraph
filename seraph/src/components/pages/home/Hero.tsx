@@ -1,59 +1,78 @@
-import { useEffect, useState } from 'react';
-import SearchBar from './SearchBar';
+import { useEffect, useState } from "react";
+import SearchBar from "./SearchBar";
 
 const Hero = () => {
-    const words = ["Scan any project", "Verify any project", "Check any project", "Protect"];
-    const [index, setIndex] = useState(0);
-    const [displayed, setDisplayed] = useState("");
-    const [isDeleting, setIsDeleting] = useState(false);
+  const words = [
+    "Scan any project",
+    "Verify any project",
+    "Check any project",
+    "Stay protected",
+  ];
 
-    useEffect(() => {
-        const currentWord = words[index % words.length];
+  const [index, setIndex] = useState(0);
+  const [displayed, setDisplayed] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
-        const speed = isDeleting ? 50 : 120;
+  useEffect(() => {
+    const currentWord = words[index % words.length];
+    const speed = isDeleting ? 50 : 110;
 
-        const timeout = setTimeout(() => {
-            setDisplayed(prev => {
-                if (!isDeleting) {
-                    // typing forward
-                    const next = currentWord.substring(0, prev.length + 1);
-                    if (next === currentWord) {
-                        setTimeout(() => setIsDeleting(true), 800);
-                    }
-                    return next;
-                } else {
-                    // deleting
-                    const next = currentWord.substring(0, prev.length - 1);
-                    if (next === "") {
-                        setIsDeleting(false);
-                        setIndex(i => i + 1);
-                    }
-                    return next;
-                }
-            });
-        }, speed);
+    const timeout = setTimeout(() => {
+      setDisplayed((prev) => {
+        if (!isDeleting) {
+          const next = currentWord.slice(0, prev.length + 1);
+          if (next === currentWord) {
+            setTimeout(() => setIsDeleting(true), 900);
+          }
+          return next;
+        } else {
+          const next = currentWord.slice(0, prev.length - 1);
+          if (next === "") {
+            setIsDeleting(false);
+            setIndex((i) => i + 1);
+          }
+          return next;
+        }
+      });
+    }, speed);
 
-        return () => clearTimeout(timeout);
-    },);
+    return () => clearTimeout(timeout);
+  }, [displayed, isDeleting, index]);
 
-    return (
-        <section className="min-h-screen px-4 text-center bg-grid">
-            <div className="max-w-4xl mx-auto">
+  return (
+    <section className="min-h-screen bg-[#f7f8fa] px-4">
+      <div className="max-w-6xl mx-auto pt-32 text-center">
+        
+        {/* Eyebrow */}
+        <p className="text-sm font-medium text-gray-500 mb-4">
+          AI-powered Web3 Security
+        </p>
 
-                <h1 className="pt-32 text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
-                    <span className="bg-yellow-400 text-black px-2">{displayed}</span><br />
-                    <span className="text-yellow-400">Stay protected.</span>
-                </h1>
+        {/* Headline */}
+        <h1 className="text-4xl md:text-6xl font-semibold text-gray-900 leading-tight mb-6">
+          {displayed}
+          <span className="text-emerald-500">.</span>
+        </h1>
 
-                <p className="text-gray-300 mb-12 text-lg max-w-2xl mx-auto">
-                    AI-powered scam detection with real-time community insights.
-                </p>
+        {/* Subtext */}
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-10">
+          Instantly analyze Web3 projects using AI and real-time community intelligence.
+        </p>
 
-                <SearchBar />
+        {/* Primary Action */}
+        <div className="max-w-2xl mx-auto">
+          <SearchBar />
+        </div>
 
-            </div>
-        </section>
-    );
+        {/* Optional secondary hints */}
+        <div className="mt-8 flex justify-center gap-6 text-sm text-gray-500">
+          <span>✓ Smart Contracts</span>
+          <span>✓ Tokens</span>
+          <span>✓ Protocols</span>
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export default Hero;

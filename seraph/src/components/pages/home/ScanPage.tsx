@@ -227,7 +227,6 @@ const ScanContent = () => {
         <ReportSuccessModal
           isOpen={showSuccess}
           onClose={() => setShowSuccess(false)}
-          projectUrl={query}
         />
       </div>
     </>
