@@ -49,42 +49,43 @@ const TrendingScams = () => {
           </Link>
         </div>
 
-        {/* Loading */}
+        {/* Loading State – Single row skeleton */}
         {loading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
             {[...Array(8)].map((_, i) => (
               <div
                 key={i}
-                className="h-80 rounded-2xl bg-white border border-gray-200 shadow-sm animate-pulse"
+                className="h-80 w-80 flex-shrink-0 rounded-2xl bg-white border border-gray-200 shadow-sm animate-pulse snap-start"
               />
             ))}
           </div>
         )}
 
-        {/* Empty */}
+        {/* Empty State */}
         {!loading && scams.length === 0 && (
           <p className="text-gray-500 text-center py-16">
             No reports yet. Be the first to report a scam.
           </p>
         )}
 
-        {/* Grid */}
+        {/* Cards – Single horizontal row with scroll */}
         {!loading && scams.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
+          <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
             {scams.map((scam) => (
-              <ScamCard
-                key={scam._id}
-                _id={scam._id}
-                title={scam.title}
-                entityType={scam.category}
-                summary={scam.summary}
-                tags={scam.tags}
-                communitySafe={scam.communitySafe}
-                explanation={scam.explanation}
-                thumbnailUrl={scam.screenshot}
-                logoUrl={scam.logoUrl}
-                reportedCount={scam.reports}
-              />
+              <div key={scam._id} className="flex-shrink-0 w-80 snap-start">
+                <ScamCard
+                  _id={scam._id}
+                  title={scam.title}
+                  entityType={scam.category}
+                  summary={scam.summary}
+                  tags={scam.tags}
+                  communitySafe={scam.communitySafe}
+                  explanation={scam.explanation}
+                  thumbnailUrl={scam.screenshot}
+                  logoUrl={scam.logoUrl}
+                  reportedCount={scam.reports}
+                />
+              </div>
             ))}
           </div>
         )}

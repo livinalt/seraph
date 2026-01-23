@@ -54,43 +54,40 @@ const ReportScamModal: React.FC<ReportScamModalProps> = ({ isOpen, onClose, onSu
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col md:flex-row">
-        {/* Left Illustration / Animation */}
-        <div className="hidden md:flex flex-1 bg-emerald-50 items-center justify-center p-6">
+      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col md:flex-row">
+        {/* Left Illustration */}
+        <div className="hidden md:flex flex-1 bg-emerald-50 items-center justify-center p-8">
           <img
             src="/assets/report-illustration.png"
             alt="Report Illustration"
-            className="max-w-full max-h-80 object-contain"
+            className="max-w-full max-h-96 object-contain"
           />
         </div>
 
-        {/* Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="flex-1 p-6 space-y-4 md:space-y-5"
-        >
+        {/* Right Form */}
+        <form onSubmit={handleSubmit} className="flex-1 p-8 space-y-6">
           {/* Header */}
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <AlertTriangle className="text-red-600" size={20} />
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <AlertTriangle className="text-red-600" size={22} />
               Report Scam
             </h2>
             <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition">
-              <X size={20} />
+              <X size={22} />
             </button>
           </div>
 
-          {/* Type selection */}
-          <div className="flex flex-wrap gap-2 mb-2">
+          {/* Type Selection Pills */}
+          <div className="flex flex-wrap gap-2">
             {typeOptions.map((type) => (
               <button
                 key={type.id}
                 type="button"
                 onClick={() => setSelectedType(type.id)}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition
+                className={`flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium transition
                   ${
                     selectedType === type.id
                       ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
@@ -102,40 +99,42 @@ const ReportScamModal: React.FC<ReportScamModalProps> = ({ isOpen, onClose, onSu
             ))}
           </div>
 
-          {/* Dynamic fields */}
-          {(selectedType === "token" || selectedType === "project" || selectedType === "team") && (
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              required
-              placeholder={selectedType === "team" ? "Team Member / Role" : "Project / Token Name"}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
-            />
-          )}
+          {/* Dynamic Fields Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {(selectedType === "token" || selectedType === "project" || selectedType === "team") && (
+              <input
+                type="text"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                required
+                placeholder={selectedType === "team" ? "Team Member / Role" : "Project / Token Name"}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+              />
+            )}
 
-          {(selectedType === "website" || selectedType === "project") && (
-            <input
-              type="url"
-              name="website"
-              value={form.website}
-              onChange={handleChange}
-              placeholder="Website URL (optional)"
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
-            />
-          )}
+            {(selectedType === "website" || selectedType === "project") && (
+              <input
+                type="url"
+                name="website"
+                value={form.website}
+                onChange={handleChange}
+                placeholder="Website URL (optional)"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+              />
+            )}
 
-          {(selectedType === "contract" || selectedType === "token") && (
-            <input
-              type="text"
-              name="contract"
-              value={form.contract}
-              onChange={handleChange}
-              placeholder="Contract Address"
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition font-mono text-xs"
-            />
-          )}
+            {(selectedType === "contract" || selectedType === "token") && (
+              <input
+                type="text"
+                name="contract"
+                value={form.contract}
+                onChange={handleChange}
+                placeholder="Contract Address"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition font-mono text-xs"
+              />
+            )}
+          </div>
 
           {/* Reason */}
           <textarea
@@ -148,7 +147,7 @@ const ReportScamModal: React.FC<ReportScamModalProps> = ({ isOpen, onClose, onSu
             className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition resize-none"
           />
 
-          {/* Evidence */}
+          {/* Evidence Upload */}
           <input type="file" id="evidence" className="hidden" onChange={handleFile} />
           <label
             htmlFor="evidence"
@@ -158,13 +157,14 @@ const ReportScamModal: React.FC<ReportScamModalProps> = ({ isOpen, onClose, onSu
             {form.evidence ? form.evidence.name : "Upload screenshot or proof (optional)"}
           </label>
 
+          {/* Error */}
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
           {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 rounded-xl transition shadow-lg"
+            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 rounded-2xl transition shadow-lg"
           >
             {loading ? "Submitting..." : "Submit Report"}
           </button>

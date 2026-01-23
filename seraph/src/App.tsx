@@ -11,6 +11,8 @@ import Privacy from "./components/pages/legal/Privacy";
 import Disclaimer from "./components/pages/legal/Disclaimer";
 import Contact from "./components/pages/legal/Contact";
 import CookieBanner from "./components/cookies/CookieBanner.tsx";
+import BlogDetails from "./components/pages/blog/BlogDetails.tsx";
+import BlogPage from "./components/pages/blog/BlogPage.tsx";
 
 function App() {
   // const handleOpenReport = () => {
@@ -18,54 +20,96 @@ function App() {
   // };
 
   return (
-
     <>
-    
-    <CookieBanner/>
-          
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <Layout>
-            <HomePage />
-          </Layout>
-        }
-      />
+      <CookieBanner />
 
-      <Route
-        path="/scan"
-        element={
-          <Layout>
-           <ScanContent />
-          </Layout>
-        }
-      />
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Layout>
+              <HomePage />
+            </Layout>
+          }
+        />
 
-      <Route
-        path="/directory"
-        element={
-          <Layout>
-            <ScamDirectory />
-          </Layout>
-        }
-      />
+        <Route
+          path="/scan"
+          element={
+            <Layout>
+              <ScanContent />
+            </Layout>
+          }
+        />
 
-      <Route
-        path="/project/:id"
-        element={
-          <Layout>
-            <ProjectDetails />
-          </Layout>
-        }
-      />
+        <Route
+          path="/directory"
+          element={
+            <Layout>
+              <ScamDirectory />
+            </Layout>
+          }
+        />
 
-      {/* LEGAL */}
-      <Route path="/terms" element={<Layout><Terms /></Layout>} />
-      <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
-      <Route path="/disclaimer" element={<Layout><Disclaimer /></Layout>} />
-      <Route path="/contact" element={<Layout><Contact /></Layout>} />
-    </Routes>
+        <Route
+          path="/project/:id"
+          element={
+            <Layout>
+              <ProjectDetails />
+            </Layout>
+          }
+        />
+
+        {/* LEGAL */}
+        <Route
+          path="/terms"
+          element={
+            <Layout>
+              <Terms />
+            </Layout>
+          }
+        />
+        <Route
+          path="/privacy"
+          element={
+            <Layout>
+              <Privacy />
+            </Layout>
+          }
+        />
+        <Route
+          path="/disclaimer"
+          element={
+            <Layout>
+              <Disclaimer />
+            </Layout>
+          }
+        />
+        <Route
+          path="/contact"
+          element={
+            <Layout>
+              <Contact />
+            </Layout>
+          }
+        />
+        <Route
+          path="/blog"
+          element={
+            <Layout>
+              <BlogPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/blog/:slug"
+          element={
+            <Layout>
+              <BlogDetails />
+            </Layout>
+          }
+        />
+      </Routes>
     </>
   );
 }

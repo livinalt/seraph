@@ -37,7 +37,7 @@ export default function ScamDirectory() {
   const [selected, setSelected] = useState<ScamItem | null>(null);
 
   /* -----------------------------
-     Derive categories dynamically
+     Derive categories
   ------------------------------*/
   const categories = useMemo(() => {
     return Array.from(new Set(scams.map((s) => s.category)));
@@ -91,32 +91,32 @@ export default function ScamDirectory() {
     <>
       <Header />
 
-      <main className="bg-[#F8FAFC] min-h-screen text-slate-900">
+      <main className="bg-white min-h-screen text-slate-900">
         {/* ================= HERO ================= */}
-        <section className="pt-28 pb-16 bg-white">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="max-w-3xl space-y-6">
-              <h1 className="text-3xl font-semibold leading-tight">
-                Scam Intelligence Directory
-              </h1>
+        <section className="bg-[#F8FAFC] pt-24 pb-10">
+          <div className="max-w-5xl mx-auto px-6 text-center space-y-5">
+            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
+              Scam Intelligence Directory
+            </h1>
 
-              <p className="text-sm text-slate-500 max-w-xl">
-                Explore AI-analyzed projects, community-reported scams, and
-                high-risk entities across Web3 and beyond.
-              </p>
+            <p className="text-sm text-slate-500 max-w-2xl mx-auto">
+              Explore AI-analyzed projects, community-reported scams, and
+              high-risk entities across Web3 and beyond.
+            </p>
 
+            <div className="max-w-xl mx-auto">
               <DirectorySearch value={query} onChange={setQuery} />
             </div>
           </div>
         </section>
 
-        {/* ================= FILTER BAR ================= */}
-        <section className="bg-white">
+        {/* ================= FILTER / TABS BAR ================= */}
+        <section className="bg-white border-t border-slate-200">
           <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className="flex items-center justify-between gap-4">
-              {/* Scrollable filters */}
-              <div className="flex-1 overflow-hidden">
-                <div className="flex gap-3 overflow-x-auto no-scrollbar">
+            <div className="flex items-center justify-between gap-6">
+              {/* Tab-style filters */}
+              <div className="flex-1 overflow-x-auto no-scrollbar">
+                <div className="flex gap-3">
                   <DirectoryFilters
                     filters={filters}
                     setFilters={setFilters}
@@ -134,7 +134,7 @@ export default function ScamDirectory() {
         </section>
 
         {/* ================= AD ================= */}
-        <div className="max-w-7xl mx-auto px-6 my-10">
+        <div className="max-w-7xl mx-auto px-6 my-8">
           <div className="bg-white rounded-xl border border-slate-200 p-4 text-center">
             <p className="text-xs text-slate-400 mb-2">Advertisement</p>
             <AdBanner />
@@ -144,7 +144,7 @@ export default function ScamDirectory() {
         {/* ================= GRID ================= */}
         <section className="max-w-7xl mx-auto px-6 pb-24">
           {initialLoad && loading ? (
-            <div className="py-20 text-center text-sm text-slate-500">
+            <div className="py-16 text-center text-sm text-slate-500">
               Loading scams…
             </div>
           ) : (
@@ -166,7 +166,6 @@ export default function ScamDirectory() {
                   />
                 ))}
 
-                {/* Skeletons during refetch */}
                 {!initialLoad &&
                   loading &&
                   Array.from({ length: 4 }).map((_, i) => (
@@ -177,9 +176,8 @@ export default function ScamDirectory() {
                   ))}
               </div>
 
-              {/* Load more */}
               {page * pageSize < total && (
-                <div className="mt-16 text-center">
+                <div className="mt-14 text-center">
                   <button
                     disabled={loading}
                     onClick={() => setPage((p) => p + 1)}
@@ -187,8 +185,7 @@ export default function ScamDirectory() {
                       px-6 py-2.5 text-sm font-medium
                       bg-white border border-slate-300
                       rounded-lg hover:bg-slate-50
-                      transition
-                      disabled:opacity-50
+                      transition disabled:opacity-50
                     "
                   >
                     {loading ? "Loading…" : "Load more"}
@@ -200,7 +197,7 @@ export default function ScamDirectory() {
         </section>
 
         {/* ================= CTA ================= */}
-        <section className="bg-white py-20 text-center">
+        <section className="bg-[#F8FAFC] py-20 text-center">
           <h3 className="text-2xl font-semibold">
             Found a scam we missed?
           </h3>

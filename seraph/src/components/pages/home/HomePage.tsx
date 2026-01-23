@@ -1,9 +1,9 @@
 import Header from "../../Header";
 import Hero from "./Hero";
-import TrustBadges from "./TrustBadges";
+// import TrustBadges from "./TrustBadges";
 import TrendingScams from "./TrendingScams";
 import BlogSection from "./BlogSection";
-import HowItWorks from "./HowItWorks";
+// import HowItWorks from "./HowItWorks";
 import CTA from "./CTA";
 import AdBanner from "../../ads/AdBanner";
 
@@ -23,10 +23,10 @@ const HomePage = () => {
           </div>
         </div>
 
-        <TrustBadges />
+        {/* <TrustBadges /> */}
         <TrendingScams />
         <BlogSection />
-        <HowItWorks />
+        {/* <HowItWorks /> */}
 
         {/* Second ad */}
         <section className="py-12">

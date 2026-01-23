@@ -1,39 +1,33 @@
 @import "tailwindcss";
 
-/* Grid Background — Codecademy style */
-.grid-bg {
-  background-color: #0f1624; /* deep navy */
-  background-image:
-      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 22px 22px;
-}
-
-/* CTA section */
-@keyframes sweep {
+@keyframes radar-pulse {
   0% {
-    transform: translateX(-100%) translateY(-50%);
+    transform: scale(0.1);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.6;
   }
   100% {
-    transform: translateX(100%) translateY(-50%);
+    transform: scale(1.2);
+    opacity: 0;
   }
 }
 
-.animate-sweep {
-  animation: sweep 6s linear infinite;
+.animate-radar-pulse {
+  animation: radar-pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* logo css and animations */
-@layer utilities {
-  .animate-spin-slow {
-    animation: spin 8s linear infinite;
-  }
-}
+/* Staggered delays (Tailwind doesn't have built-in negative delays, so custom classes) */
+.animation-delay-2000 { animation-delay: 2s; }
+.animation-delay-4000 { animation-delay: 4s; }
+.animation-delay-6000 { animation-delay: 6s; }
 
-@keyframes pulse-glow {
-  0%, 100% { filter: drop-shadow(0 0 8px #fbbf24); }
-  50% { filter: drop-shadow(0 0 20px #f59e0b); }
+
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
 }
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;             /* Chrome, Safari, Opera */
 }

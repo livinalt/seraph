@@ -18,7 +18,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+      <header className="fixed top-0 left-0 w-full z-50 bg-[#f7f8fa] backdrop-blur-md border-b border-gray-200">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-6">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
@@ -49,14 +49,17 @@ const Header = () => {
             >
               Scam List
             </Link>
-
-            <button
-              onClick={handleBlogScroll}
-              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+            
+            <Link
+              to="/blog"
+              className={`text-sm font-medium transition ${
+                isActive("/blog") ? "text-emerald-600" : "text-gray-600 hover:text-gray-900"
+              }`}
             >
               Blog
-            </button>
+            </Link>
 
+            
             {/* Actions */}
             <div className="flex items-center gap-4">
               <Link
